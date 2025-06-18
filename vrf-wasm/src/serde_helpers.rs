@@ -4,8 +4,6 @@
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
 use crate::error::FastCryptoError;
-use crate::encoding::{Base64, Encoding};
-use crate::traits::ToFromBytes;
 
 // Serde treats arrays larger than 32 as variable length arrays, and adds the length as a prefix.
 // Since we want a fixed size representation, we wrap it in this helper struct and use serde_as.

@@ -7,8 +7,8 @@ use crate::{
     error::FastCryptoError,
     hash::HashFunction,
 };
-use rand::rngs::{StdRng, ThreadRng};
-use rand::{CryptoRng, RngCore};
+use getrandom::getrandom;
+use rand_core::{CryptoRng, RngCore};
 use serde::{de::DeserializeOwned, Serialize};
 use std::{
     borrow::Borrow,
@@ -198,8 +198,7 @@ pub trait KeyPair:
     /// Get the private key.
     fn private(self) -> Self::PrivKey;
 
-    #[cfg(feature = "copy_key")]
-    fn copy(&self) -> Self;
+    // fn copy(&self) -> Self;
 
     /// Generate a new keypair using the given RNG.
     fn generate<R: AllowedRng>(rng: &mut R) -> Self;
@@ -390,13 +389,41 @@ pub trait InsecureDefault {
     fn insecure_default() -> Self;
 }
 
+/// WASM-compatible RNG using getrandom
+pub struct WasmRng;
+
+impl CryptoRng for WasmRng {}
+
+impl RngCore for WasmRng {
+    fn next_u32(&mut self) -> u32 {
+        let mut bytes = [0u8; 4];
+        self.fill_bytes(&mut bytes);
+        u32::from_le_bytes(bytes)
+    }
+
+    fn next_u64(&mut self) -> u64 {
+        let mut bytes = [0u8; 8];
+        self.fill_bytes(&mut bytes);
+        u64::from_le_bytes(bytes)
+    }
+
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        getrandom(dest).expect("getrandom failed");
+    }
+
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
+        getrandom(dest).map_err(|e| rand_core::Error::new(e))
+    }
+}
+
+/// WASM-compatible seeded RNG using ChaCha20 for better compatibility
+pub type WasmRngFromSeed = rand_chacha::ChaCha20Rng;
+
 // Whitelist the RNG our APIs accept (see https://rust-random.github.io/book/guide-rngs.html for
 // others).
 /// Trait impl'd by RNG's accepted by fastcrypto.
 pub trait AllowedRng: CryptoRng + RngCore {}
 
-// StdRng uses ChaCha12 (see https://github.com/rust-random/rand/issues/932).
-// It should be seeded with OsRng (e.g., StdRng::from_rng(OsRng)).
-impl AllowedRng for StdRng {}
-// thread_rng() uses OsRng for the seed, and ChaCha12 as the PRG function.
-impl AllowedRng for ThreadRng {}
+// WASM-compatible RNG implementations using getrandom
+impl AllowedRng for WasmRng {}
+impl AllowedRng for WasmRngFromSeed {}

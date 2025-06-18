@@ -2,7 +2,8 @@
 use wasm_bindgen::prelude::*;
 use vrf_wasm::{
     ecvrf::{ECVRFKeyPair, ECVRFPublicKey, ECVRFProof},
-    VRFKeyPair, VRFProof
+    traits::{WasmRng, WasmRngFromSeed},
+    vrf::{VRFKeyPair, VRFProof},
 };
 
 // Initialize panic hook for better error messages in the browser
@@ -22,7 +23,7 @@ impl VRFKeyPairJS {
     /// Generate a new VRF keypair
     #[wasm_bindgen(constructor)]
     pub fn new() -> Result<VRFKeyPairJS, JsValue> {
-        let mut rng = rand::thread_rng();
+        let mut rng = WasmRng;
         let keypair = ECVRFKeyPair::generate(&mut rng);
 
         Ok(VRFKeyPairJS { inner: keypair })
@@ -140,11 +141,15 @@ pub fn keypair_from_seed(seed: &[u8]) -> Result<VRFKeyPairJS, JsValue> {
         return Err(JsValue::from_str("Seed must be at least 32 bytes"));
     }
 
-    use rand::SeedableRng;
+    // For deterministic generation, we'll use the seed directly to generate the keypair
+    // This is a simplified approach - in production you might want a more sophisticated
+    // key derivation function
     let mut seed_array = [0u8; 32];
     seed_array.copy_from_slice(&seed[..32]);
 
-    let mut rng = rand::rngs::StdRng::from_seed(seed_array);
+    // Create a deterministic RNG from the seed
+    use rand_core::SeedableRng;
+    let mut rng = WasmRngFromSeed::from_seed(seed_array);
     let keypair = ECVRFKeyPair::generate(&mut rng);
 
     Ok(VRFKeyPairJS { inner: keypair })

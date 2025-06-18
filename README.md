@@ -16,10 +16,8 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-vrf-wasm = "0.1"
+vrf-wasm = "0.2"
 ```
-
-
 
 ## Usage
 
@@ -28,10 +26,10 @@ vrf-wasm = "0.1"
 ```rust
 use vrf_wasm::ecvrf::ECVRFKeyPair;
 use vrf_wasm::vrf::{VRFKeyPair, VRFProof};
-use rand::thread_rng;
+use vrf_wasm::traits::WasmRng;
 
 // Generate a keypair
-let mut rng = thread_rng();
+let mut rng = WasmRng::new();
 let keypair = ECVRFKeyPair::generate(&mut rng);
 
 // Create VRF proof for input
@@ -53,10 +51,10 @@ println!("VRF Hash: {}", hex::encode(hash));
 ```rust
 use vrf_wasm::ecvrf::{ECVRFKeyPair, ECVRFProof, ECVRFPublicKey};
 use vrf_wasm::vrf::{VRFKeyPair, VRFProof};
-use rand::thread_rng;
+use vrf_wasm::traits::WasmRng;
 
 // Generate keypair
-let mut rng = thread_rng();
+let mut rng = WasmRng::new();
 let keypair = ECVRFKeyPair::generate(&mut rng);
 let public_key = keypair.pk.clone();
 
@@ -72,51 +70,6 @@ let hash = proof.to_hash();
 println!("VRF Output: {}", hex::encode(hash));
 ```
 
-### Deterministic KeyPair Generation
-
-```rust
-use vrf_wasm::ecvrf::ECVRFKeyPair;
-use vrf_wasm::vrf::VRFKeyPair;
-use rand::{SeedableRng, rngs::StdRng};
-
-// Generate deterministic keypair from seed
-let seed = [42u8; 32];
-let mut rng = StdRng::from_seed(seed);
-let keypair = ECVRFKeyPair::generate(&mut rng);
-
-// Same seed always generates same keypair
-let mut rng2 = StdRng::from_seed(seed);
-let keypair2 = ECVRFKeyPair::generate(&mut rng2);
-
-// Prove this by generating same VRF output
-let input = b"test";
-let (hash1, _) = keypair.output(input);
-let (hash2, _) = keypair2.output(input);
-assert_eq!(hash1, hash2);
-```
-
-### Serialization
-
-```rust
-use vrf_wasm::ecvrf::{ECVRFKeyPair, ECVRFProof, ECVRFPublicKey};
-use vrf_wasm::vrf::VRFKeyPair;
-
-// All types implement Serialize/Deserialize
-let keypair = ECVRFKeyPair::generate(&mut rand::thread_rng());
-let input = b"data";
-let proof = keypair.prove(input);
-
-// Serialize to bytes
-let public_key_bytes = bincode::serialize(&keypair.pk).unwrap();
-let proof_bytes = bincode::serialize(&proof).unwrap();
-
-// Deserialize
-let public_key: ECVRFPublicKey = bincode::deserialize(&public_key_bytes).unwrap();
-let deserialized_proof: ECVRFProof = bincode::deserialize(&proof_bytes).unwrap();
-
-// Verify still works
-assert!(deserialized_proof.verify(input, &public_key).is_ok());
-```
 
 ## Building for WASM
 
@@ -124,8 +77,12 @@ assert!(deserialized_proof.verify(input, &public_key).is_ok());
 # Add WASM target
 rustup target add wasm32-unknown-unknown
 
-# Build for WASM
-cargo build --target wasm32-unknown-unknown --release
+# Build For web WASM:
+cargo build --target wasm32-unknown-unknown --no-default-features
+
+# Build For smart contracts (if using cosmwasm):
+cargo build --target wasm32-unknown-unknown --release --no-default-features
+
 
 # Or use wasm-pack for JavaScript bindings
 # Install wasm-pack if not already installed
@@ -162,7 +119,7 @@ All dependencies are pure Rust and WASM-compatible:
 - `sha2` / `sha3` - Cryptographic hash functions
 - `elliptic-curve` - Hash-to-curve functionality
 - `serde` - Serialization support
-- `rand` / `getrandom` - Random number generation
+- `rand_core` / `getrandom` - Random number generation
 
 
 ## External Resources
