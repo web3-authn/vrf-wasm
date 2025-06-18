@@ -70,10 +70,13 @@ impl MultiScalarMul for RistrettoPoint {
         }
 
         Ok(RistrettoPoint(
-            ExternalRistrettoPoint::vartime_multiscalar_mul(
-                scalars.iter().map(|s| s.0),
-                points.iter().map(|g| g.0),
-            ),
+            scalars.iter().zip(points.iter())
+                .map(|(s, p)| p.0 * s.0)
+                .fold(ExternalRistrettoPoint::identity(), |acc, point| acc + point),
+            // ExternalRistrettoPoint::vartime_multiscalar_mul(
+            //     scalars.iter().map(|s| s.0),
+            //     points.iter().map(|g| g.0),
+            // ),
         ))
     }
 }

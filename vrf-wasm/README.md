@@ -16,7 +16,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-vrf-wasm = "0.2"
+vrf-wasm = "0.3"
 ```
 
 

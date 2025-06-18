@@ -6,6 +6,9 @@ pub mod serde_helpers;
 pub mod traits;
 pub mod vrf;
 
+#[cfg(test)]
+pub mod tests;
+
 pub use encoding::*;
 pub use error::*;
 pub use hash::*;

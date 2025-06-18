@@ -412,7 +412,10 @@ impl RngCore for WasmRng {
     }
 
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
-        getrandom(dest).map_err(|e| rand_core::Error::new(e))
+        // Only availabe with `std` features, not available in WASM
+        // getrandom(dest).map_err(|e| rand_core::Error::new(e))
+        self.fill_bytes(dest);
+        Ok(())
     }
 }
 

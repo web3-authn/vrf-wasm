@@ -10,14 +10,6 @@ FastCrypto has C dependencies (`secp256k1-sys`, `blst`) that prevent WASM compil
 - **Lightweight**: Pure Rust, no FFI overhead ~143KB WASM binary when compiled for web
 - **Flexible**: Use as Rust library or compile to WASM
 
-## Installation
-
-Add to your `Cargo.toml`:
-
-```toml
-[dependencies]
-vrf-wasm = "0.2"
-```
 
 ## Usage
 
