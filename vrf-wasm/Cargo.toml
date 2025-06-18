@@ -1,0 +1,35 @@
+[package]
+name = "vrf-wasm"
+version = "0.1.3"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["Mysten Labs <build@mystenlabs.com>"]
+description = "VRF for WASM environments"
+repository = "https://github.com/web3authn/vrf-wasm"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+auto_ops = "0.3.0"
+base64ct = { version = "1.5.3", features = ["alloc"] }
+bech32 = "0.9.1"
+bincode = "1.3.3"
+bs58 = "0.4.0"
+curve25519-dalek-ng = "4.1.1"
+derive_more = "0.99.16"
+digest = "0.10.6"
+hex = "0.4.3"
+elliptic-curve = { version = "0.13.2", features = ["hash2curve"] }
+generic-array = { version = "0.14.6", features = ["serde"] }
+getrandom = { version = "0.2.15", features = ["js"] }
+rand = { version = "0.8.5", features = ["std"] }
+schemars = "0.8.12"
+serde = { version = "1.0.152", features = ["derive"] }
+serde_with = { version = "3", default-features = false, features = ["alloc", "macros"] }
+sha2 = "0.10.6"
+sha3 = "0.10.6"
+thiserror = "1.0.38"
+zeroize = { version = "1.5.7", features = ["derive"] }
+
+fastcrypto-derive = { path = "../fastcrypto-derive" }

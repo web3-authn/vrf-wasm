@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = [
+    "vrf-wasm",
+    "vrf-wasm-js",
+    "fastcrypto-derive"
+]
