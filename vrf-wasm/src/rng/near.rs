@@ -74,3 +74,5 @@ impl AllowedRng for WasmRng {}
 
 /// WASM-compatible seeded RNG using ChaCha20 for deterministic operations
 pub type WasmRngFromSeed = rand_chacha::ChaCha20Rng;
+
+// Note: AllowedRng for ChaCha20Rng is implemented in traits.rs to avoid conflicts

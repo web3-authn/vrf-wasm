@@ -1,6 +1,6 @@
 [package]
 name = "vrf-contract-verify"
-version = "0.4.0"
+version = "0.4.1"
 edition = "2021"
 description = "Minimal VRF proof verification for smart contracts"
 license = "Apache-2.0"
