@@ -3,5 +3,13 @@ resolver = "2"
 members = [
     "vrf-wasm",
     "vrf-wasm-js",
-    "fastcrypto-derive"
+    "fastcrypto-derive",
+    "vrf-contract-verify",
 ]
+
+[workspace.dependencies]
+# Common version pins for workspace members
+curve25519-dalek-ng = { version = "4.1.1", default-features = false }
+sha2 = { version = "0.10.6", default-features = false }
+serde = { version = "1.0.152", default-features = false }
+bincode = "1.3.3"

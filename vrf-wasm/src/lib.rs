@@ -2,6 +2,7 @@ pub mod encoding;
 pub mod error;
 pub mod hash;
 pub mod groups;
+pub mod rng;
 pub mod serde_helpers;
 pub mod traits;
 pub mod vrf;

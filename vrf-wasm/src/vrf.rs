@@ -170,8 +170,8 @@ pub mod ecvrf {
     }
 
     /// Type representing a scalar of [C_LEN] bytes.
-    #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
-    struct Challenge([u8; C_LEN]);
+    #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Copy)]
+    pub struct Challenge(pub [u8; C_LEN]);
 
     impl From<&Challenge> for RistrettoScalar {
         fn from(c: &Challenge) -> Self {
@@ -224,9 +224,9 @@ pub mod ecvrf {
 
     #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
     pub struct ECVRFProof {
-        gamma: RistrettoPoint,
-        c: Challenge,
-        s: RistrettoScalar,
+        pub gamma: RistrettoPoint,
+        pub c: Challenge,
+        pub s: RistrettoScalar,
     }
 
     impl VRFProof<64> for ECVRFProof {
@@ -268,6 +268,57 @@ pub mod ecvrf {
             hash.update(self.gamma.compress());
             hash.update([0x00]); // proof_to_hash_domain_separator_back
             hash.finalize().digest
+        }
+    }
+
+    impl ECVRFProof {
+        /// Get the gamma component as compressed point bytes (32 bytes)
+        pub fn gamma_bytes(&self) -> [u8; 32] {
+            self.gamma.compress()
+        }
+
+        /// Get the challenge component as bytes (16 bytes)
+        pub fn challenge_bytes(&self) -> [u8; C_LEN] {
+            self.c.0
+        }
+
+        /// Get the scalar component as bytes (32 bytes)
+        pub fn scalar_bytes(&self) -> [u8; 32] {
+            self.s.to_byte_array()
+        }
+
+        /// Create an ECVRFProof from individual components
+        ///
+        /// # Parameters
+        /// - `gamma_bytes`: 32-byte compressed point representing gamma
+        /// - `challenge_bytes`: 16-byte challenge
+        /// - `scalar_bytes`: 32-byte scalar
+        ///
+        /// # Returns
+        /// Result containing the constructed proof or an error if the components are invalid
+        pub fn from_components(
+            gamma_bytes: &[u8; 32],
+            challenge_bytes: &[u8; C_LEN],
+            scalar_bytes: &[u8; 32],
+        ) -> Result<Self, FastCryptoError> {
+            // Decompress gamma point
+            let gamma = RistrettoPoint::try_from(gamma_bytes.as_slice())?;
+
+            // Create challenge
+            let c = Challenge(*challenge_bytes);
+
+            // Create scalar
+            let s = RistrettoScalar::from_byte_array(scalar_bytes)?;
+
+            Ok(ECVRFProof { gamma, c, s })
+        }
+
+        /// Extract all components as byte arrays for cross-verification
+        ///
+        /// # Returns
+        /// Tuple of (gamma_bytes, challenge_bytes, scalar_bytes)
+        pub fn to_components(&self) -> ([u8; 32], [u8; C_LEN], [u8; 32]) {
+            (self.gamma_bytes(), self.challenge_bytes(), self.scalar_bytes())
         }
     }
 }

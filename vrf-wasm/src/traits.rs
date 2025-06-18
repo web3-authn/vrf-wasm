@@ -1,13 +1,7 @@
 // Copyright (c) 2021, Facebook, Inc. and its affiliates
 // Copyright (c) 2022, Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
-use crate::error::FastCryptoResult;
-use crate::{
-    encoding::{Base64, Encoding},
-    error::FastCryptoError,
-    hash::HashFunction,
-};
-use getrandom::getrandom;
+
 use rand_core::{CryptoRng, RngCore};
 use serde::{de::DeserializeOwned, Serialize};
 use std::{
@@ -15,6 +9,14 @@ use std::{
     fmt::{Debug, Display},
     str::FromStr,
 };
+use crate::error::FastCryptoResult;
+use crate::{
+    encoding::{Base64, Encoding},
+    error::FastCryptoError,
+    hash::HashFunction,
+};
+// Import RNG implementations from the rng module
+pub use crate::rng::{WasmRng, WasmRngFromSeed};
 
 /// Trait impl'd by concrete types that represent digital cryptographic material
 /// (keys).
@@ -389,44 +391,9 @@ pub trait InsecureDefault {
     fn insecure_default() -> Self;
 }
 
-/// WASM-compatible RNG using getrandom
-pub struct WasmRng;
-
-impl CryptoRng for WasmRng {}
-
-impl RngCore for WasmRng {
-    fn next_u32(&mut self) -> u32 {
-        let mut bytes = [0u8; 4];
-        self.fill_bytes(&mut bytes);
-        u32::from_le_bytes(bytes)
-    }
-
-    fn next_u64(&mut self) -> u64 {
-        let mut bytes = [0u8; 8];
-        self.fill_bytes(&mut bytes);
-        u64::from_le_bytes(bytes)
-    }
-
-    fn fill_bytes(&mut self, dest: &mut [u8]) {
-        getrandom(dest).expect("getrandom failed");
-    }
-
-    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
-        // Only availabe with `std` features, not available in WASM
-        // getrandom(dest).map_err(|e| rand_core::Error::new(e))
-        self.fill_bytes(dest);
-        Ok(())
-    }
-}
-
-/// WASM-compatible seeded RNG using ChaCha20 for better compatibility
-pub type WasmRngFromSeed = rand_chacha::ChaCha20Rng;
-
 // Whitelist the RNG our APIs accept (see https://rust-random.github.io/book/guide-rngs.html for
 // others).
-/// Trait impl'd by RNG's accepted by fastcrypto.
+/// Trait impl'd by RNG's accepted by vrf-wasm.
 pub trait AllowedRng: CryptoRng + RngCore {}
 
-// WASM-compatible RNG implementations using getrandom
-impl AllowedRng for WasmRng {}
-impl AllowedRng for WasmRngFromSeed {}
+// The AllowedRng implementations are provided in the specific rng modules

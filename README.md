@@ -1,127 +1,200 @@
 # VRF-WASM
 
-A WASM-compatible Verifiable Random Function (VRF) implementation extracted from [FastCrypto](https://github.com/MystenLabs/fastcrypto/).
+A pure-Rust VRF (Verifiable Random Function) implementation optimized for WASM environments, including web browsers and smart contracts.
 
-FastCrypto has C dependencies (`secp256k1-sys`, `blst`) that prevent WASM compilation even when compiling with `wasm` feature flags. This library extracts only the VRF module which uses pure Rust dependencies.
+## Project Structure
 
-## Features
-- **WASM Compatible**: Runs in browsers, Node.js, and WASM workers
-- **Cryptographically Secure**: ECVRF implementation following [draft-irtf-cfrg-vrf-15](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-15)
-- **Lightweight**: Pure Rust, no FFI overhead ~143KB WASM binary when compiled for web
-- **Flexible**: Use as Rust library or compile to WASM
+This repository contains multiple crates for different use cases:
 
+### 🌐 [`vrf-wasm/`](./vrf-wasm/) - Full VRF Library
+Complete VRF implementation with key generation, signing, and verification:
+- **Key Generation**: Secure VRF keypair creation
+- **Proof Generation**: Create VRF proofs with randomness
+- **Verification**: Verify VRF proofs and outputs
+- **WASM Compatible**: Works in browsers and Node.js
+- **Size**: ~100KB compiled
 
-## Usage
+**Use for**: Client-side applications, oracles, services that need full VRF functionality
 
-### Basic VRF Operations
+### 🔗 [`vrf-wasm-js/`](./vrf-wasm-js/) - JavaScript Bindings
+Browser and Node.js bindings for the full VRF library:
+- **TypeScript Support**: Full type definitions
+- **Easy Integration**: Simple npm package
+- **Modern APIs**: Promise-based async functions
 
-```rust
-use vrf_wasm::ecvrf::ECVRFKeyPair;
-use vrf_wasm::vrf::{VRFKeyPair, VRFProof};
-use vrf_wasm::traits::WasmRng;
+### 📋 [`vrf-contract-verify/`](./vrf-contract-verify/) - Contract Verification Only
+**NEW**: Minimal verification-only library optimized for smart contracts:
+- **Minimal**: Only verification logic (~10KB compiled)
+- **No-std Compatible**: Works in constrained environments
+- **Multi-Platform**: NEAR, CosmWasm, generic WASM
+- **Battle Tested**: Uses proven verification logic
+- **Fast**: Optimized for contract gas costs
 
-// Generate a keypair
-let mut rng = WasmRng::new();
-let keypair = ECVRFKeyPair::generate(&mut rng);
+**Use for**: Smart contracts that only need to verify VRF proofs
 
-// Create VRF proof for input
-let input = b"Hello, VRF!";
-let (hash, proof) = keypair.output(input);
+## Quick Start
 
-// Verify the proof
-assert!(proof.verify(input, &keypair.pk).is_ok());
-
-// The hash is deterministic for the same key and input
-let (hash2, _) = keypair.output(input);
-assert_eq!(hash, hash2);
-
-println!("VRF Hash: {}", hex::encode(hash));
+### For Smart Contracts (Verification Only)
+```toml
+[dependencies]
+vrf-contract-verify = { version = "0.1", features = ["near"] }
 ```
 
-### Separate Proof Generation and Verification
-
 ```rust
-use vrf_wasm::ecvrf::{ECVRFKeyPair, ECVRFProof, ECVRFPublicKey};
-use vrf_wasm::vrf::{VRFKeyPair, VRFProof};
-use vrf_wasm::traits::WasmRng;
+use vrf_contract_verify::near::VrfVerifier;
 
-// Generate keypair
-let mut rng = WasmRng::new();
-let keypair = ECVRFKeyPair::generate(&mut rng);
-let public_key = keypair.pk.clone();
-
-// Create proof
-let input = b"message to sign";
-let proof = keypair.prove(input);
-
-// Verify proof (this could be done by a different party)
-assert!(proof.verify(input, &public_key).is_ok());
-
-// Extract hash from proof
-let hash = proof.to_hash();
-println!("VRF Output: {}", hex::encode(hash));
+#[near_bindgen]
+impl MyContract {
+    pub fn verify_randomness(&self, proof: Vec<u8>, pk: Vec<u8>, seed: Vec<u8>) -> bool {
+        let verifier = VrfVerifier::new();
+        verifier.verify_vrf(proof, pk, seed)
+    }
+}
 ```
 
-
-## Building for WASM
-
+### For Web Applications (Full VRF)
 ```bash
-# Add WASM target
-rustup target add wasm32-unknown-unknown
+npm install vrf-wasm-js
+```
 
-# Build For web WASM:
-cargo build --target wasm32-unknown-unknown --no-default-features
+```javascript
+import { VRFKeyPairJS } from 'vrf-wasm-js';
 
-# Build For smart contracts (if using cosmwasm):
-cargo build --target wasm32-unknown-unknown --release --no-default-features
+const keypair = new VRFKeyPairJS();
+const proof = keypair.prove(new TextEncoder().encode("random seed"));
+const output = keypair.output(new TextEncoder().encode("random seed"));
+```
 
+### For Rust Applications
+```toml
+[dependencies]
+vrf-wasm = "0.3"
+```
 
-# Or use wasm-pack for JavaScript bindings
-# Install wasm-pack if not already installed
-cargo install wasm-pack
+```rust
+use vrf_wasm::{ECVRFKeyPair, VRFKeyPair};
+
+let keypair = ECVRFKeyPair::generate(&mut rng);
+let proof = keypair.prove(b"input data");
+```
+
+## Feature Comparison
+
+| Feature | vrf-wasm | vrf-wasm-js | vrf-contract-verify |
+|---------|----------|-------------|-------------------|
+| Key Generation | ✅ | ✅ | ❌ |
+| Proof Creation | ✅ | ✅ | ❌ |
+| Proof Verification | ✅ | ✅ | ✅ |
+| Browser Support | ✅ | ✅ | ❌ |
+| Node.js Support | ✅ | ✅ | ❌ |
+| NEAR Contracts | ⚠️ | ❌ | ✅ |
+| CosmWasm Contracts | ⚠️ | ❌ | ✅ |
+| Compiled Size | ~100KB | ~150KB | ~10KB |
+| Dependencies | Many | Many | Minimal |
+
+⚠️ = Possible but not optimized
+
+## Smart Contract Platforms
+
+### Supported Platforms (vrf-contract-verify)
+- ✅ **NEAR Protocol**: Native integration with near-sdk
+- ✅ **CosmWasm**: Cosmos SDK smart contracts
+- ✅ **Generic WASM**: Any WASM-based contract platform
+- 🔄 **Substrate/Polkadot**: With minimal modifications
+
+### Not Recommended for Contracts
+- ❌ **Full Libraries**: Too large, have global statics, RNG dependencies
+- ❌ **Key Generation**: Should be done off-chain for security
+- ❌ **Proof Creation**: Should be done by oracles/services, not contracts
+
+## WASM Compatibility
+
+All crates are designed for WASM environments:
+- **No std**: Compatible with no-std environments
+- **No global statics**: Avoids initialization issues
+- **Pure Rust**: No external dependencies on system libraries
+- **Optimized builds**: Minimal code size with `--release` builds
+
+## VRF Specification
+
+Implements ECVRF with:
+- **Curve**: Ristretto255 (prime-order group over Curve25519)
+- **Hash Function**: SHA-512
+- **Suite String**: `sui_vrf` (compatible with Sui blockchain)
+- **Output Length**: 64 bytes
+- **Challenge Length**: 16 bytes
+
+## Examples
+
+### Smart Contract Oracle
+```rust
+// NEAR contract that verifies VRF proofs from authorized oracles
+use vrf_contract_verify::near::VrfVerifier;
+
+#[near_bindgen]
+impl RandomnessOracle {
+    pub fn submit_random(&mut self, proof: Vec<u8>, round: u64) -> bool {
+        let input = round.to_le_bytes();
+        self.verifier.verify_vrf(proof, self.oracle_pubkey.clone(), input.to_vec())
+    }
+}
+```
+
+### Client-side Random Generation
+```javascript
+// Generate verifiable randomness in browser
+import { VRFKeyPairJS } from 'vrf-wasm-js';
+
+const keypair = new VRFKeyPairJS();
+const seed = crypto.getRandomValues(new Uint8Array(32));
+const { hash, proof } = keypair.output(seed);
+
+// hash can be used as randomness
+// proof can be sent to contracts for verification
+```
+
+## Building
+
+### Smart Contract Build
+```bash
+cd vrf-contract-verify
+cargo build --target wasm32-unknown-unknown --release --features near
+```
+
+### Web Build
+```bash
+cd vrf-wasm-js
 wasm-pack build --target web --out-dir pkg
 ```
 
+### Full Library Build
+```bash
+cd vrf-wasm
+cargo build --target wasm32-unknown-unknown --release
+```
 
-## Performance
+## License
 
-| Target | Binary Size | Notes |
-|--------|-------------|--------|
-| Native (release) | ~2MB | Full Rust binary |
-| WASM (release) | ~143KB | Optimized for web |
-| WASM (compressed) | ~58KB | With Brotli compression |
+Apache-2.0 - See [LICENSE](LICENSE) for details.
 
-## ECVRF Implementation Details
+## Contributing
 
-This library implements ECVRF as specified in [draft-irtf-cfrg-vrf-15](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-15) with the following parameters:
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Run tests (`cargo test`)
+4. Commit your changes (`git commit -am 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
 
-- **Curve**: Ristretto255 (built on Curve25519)
-- **Hash Function**: SHA-512
-- **Suite String**: `"sui_vrf"` (custom identifier)
-- **Challenge Length**: 16 bytes
-- **Output Length**: 64 bytes
+## Security
 
-The implementation follows the FastCrypto VRF API for compatibility while using only WASM-safe dependencies.
+This library implements the VRF specification with:
+- Constant-time operations where possible
+- Secure random number generation (client-side only)
+- Memory zeroization of sensitive data
+- No secret-dependent branching
 
-## Dependencies
-
-All dependencies are pure Rust and WASM-compatible:
-
-- `curve25519-dalek-ng` - Ristretto255 elliptic curve operations
-- `sha2` / `sha3` - Cryptographic hash functions
-- `elliptic-curve` - Hash-to-curve functionality
-- `serde` - Serialization support
-- `rand_core` / `getrandom` - Random number generation
-
-
-## External Resources
-- [Curve25519 Dalek](https://github.com/dalek-cryptography/curve25519-dalek)
-- [ECVRF Specification](https://tools.ietf.org/html/draft-irtf-cfrg-vrf-15)
-
-## Attribution
-
-This project is derived from [FastCrypto](https://github.com/MystenLabs/fastcrypto/) by Mysten Labs, Inc.
-
-**Original Copyright**: Copyright (c) 2022, Mysten Labs, Inc.
-**License**: Apache License 2.0
-**Original Repository**: https://github.com/MystenLabs/fastcrypto/
+For smart contracts:
+- Only verification is performed on-chain
+- Key generation and proof creation should be done off-chain
+- Consider replay attack protection in your contract logic

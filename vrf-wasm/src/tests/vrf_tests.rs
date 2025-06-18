@@ -4,14 +4,24 @@
 use crate::encoding::{Encoding, Hex};
 use crate::groups::ristretto255::{RistrettoPoint, RistrettoScalar};
 use crate::serde_helpers::ToFromByteArray;
-use crate::test_helpers::verify_serialization;
 use crate::vrf::ecvrf::{ECVRFKeyPair, ECVRFProof, ECVRFPublicKey};
 use crate::vrf::{VRFKeyPair, VRFProof};
-use rand::thread_rng;
+use crate::tests::test_helpers::verify_serialization;
+use crate::rng;
 
 #[test]
 fn test_proof() {
-    let kp = ECVRFKeyPair::generate(&mut thread_rng());
+    // Create RNG instance based on the implementation
+    #[cfg(feature = "browser")]
+    let mut rng_instance = rng::WasmRng;
+
+    #[cfg(feature = "near")]
+    let mut rng_instance = rng::WasmRng::default();
+
+    #[cfg(feature = "native")]
+    let mut rng_instance = rng::WasmRng;
+
+    let kp = ECVRFKeyPair::generate(&mut rng_instance);
     let input1 = b"Hello, world!";
     let (output1, proof1) = kp.output(input1);
 
@@ -29,7 +39,17 @@ fn test_proof() {
 
 #[test]
 fn test_serialize_deserialize() {
-    let kp = ECVRFKeyPair::generate(&mut thread_rng());
+    // Create RNG instance based on the implementation
+    #[cfg(feature = "browser")]
+    let mut rng_instance = rng::WasmRng;
+
+    #[cfg(feature = "near")]
+    let mut rng_instance = rng::WasmRng::default();
+
+    #[cfg(feature = "native")]
+    let mut rng_instance = rng::WasmRng;
+
+    let kp = ECVRFKeyPair::generate(&mut rng_instance);
     let pk = &kp.pk;
     let sk = &kp.sk;
     let input = b"Hello, world!";

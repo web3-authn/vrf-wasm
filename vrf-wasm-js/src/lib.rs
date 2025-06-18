@@ -155,6 +155,105 @@ pub fn keypair_from_seed(seed: &[u8]) -> Result<VRFKeyPairJS, JsValue> {
     Ok(VRFKeyPairJS { inner: keypair })
 }
 
+/// Extract gamma component from a VRF proof (32 bytes)
+#[wasm_bindgen(js_name = "extractGamma")]
+pub fn extract_gamma(proof_bytes: &[u8]) -> Result<Vec<u8>, JsValue> {
+    let proof: ECVRFProof = bincode::deserialize(proof_bytes)
+        .map_err(|e| JsValue::from_str(&format!("Invalid proof: {}", e)))?;
+
+    Ok(proof.gamma_bytes().to_vec())
+}
+
+/// Extract challenge component from a VRF proof (16 bytes)
+#[wasm_bindgen(js_name = "extractChallenge")]
+pub fn extract_challenge(proof_bytes: &[u8]) -> Result<Vec<u8>, JsValue> {
+    let proof: ECVRFProof = bincode::deserialize(proof_bytes)
+        .map_err(|e| JsValue::from_str(&format!("Invalid proof: {}", e)))?;
+
+    Ok(proof.challenge_bytes().to_vec())
+}
+
+/// Extract scalar component from a VRF proof (32 bytes)
+#[wasm_bindgen(js_name = "extractScalar")]
+pub fn extract_scalar(proof_bytes: &[u8]) -> Result<Vec<u8>, JsValue> {
+    let proof: ECVRFProof = bincode::deserialize(proof_bytes)
+        .map_err(|e| JsValue::from_str(&format!("Invalid proof: {}", e)))?;
+
+    Ok(proof.scalar_bytes().to_vec())
+}
+
+/// Extract all components from a VRF proof
+#[wasm_bindgen(js_name = "extractComponents")]
+pub fn extract_components(proof_bytes: &[u8]) -> Result<VRFComponentsJS, JsValue> {
+    let proof: ECVRFProof = bincode::deserialize(proof_bytes)
+        .map_err(|e| JsValue::from_str(&format!("Invalid proof: {}", e)))?;
+
+    let (gamma, challenge, scalar) = proof.to_components();
+
+    Ok(VRFComponentsJS {
+        gamma: gamma.to_vec(),
+        challenge: challenge.to_vec(),
+        scalar: scalar.to_vec(),
+    })
+}
+
+/// Create a VRF proof from individual components
+#[wasm_bindgen(js_name = "createProofFromComponents")]
+pub fn create_proof_from_components(
+    gamma_bytes: &[u8],
+    challenge_bytes: &[u8],
+    scalar_bytes: &[u8],
+) -> Result<Vec<u8>, JsValue> {
+    if gamma_bytes.len() != 32 {
+        return Err(JsValue::from_str("Gamma must be 32 bytes"));
+    }
+    if challenge_bytes.len() != 16 {
+        return Err(JsValue::from_str("Challenge must be 16 bytes"));
+    }
+    if scalar_bytes.len() != 32 {
+        return Err(JsValue::from_str("Scalar must be 32 bytes"));
+    }
+
+    let gamma_array: [u8; 32] = gamma_bytes.try_into()
+        .map_err(|_| JsValue::from_str("Invalid gamma length"))?;
+    let challenge_array: [u8; 16] = challenge_bytes.try_into()
+        .map_err(|_| JsValue::from_str("Invalid challenge length"))?;
+    let scalar_array: [u8; 32] = scalar_bytes.try_into()
+        .map_err(|_| JsValue::from_str("Invalid scalar length"))?;
+
+    let proof = ECVRFProof::from_components(&gamma_array, &challenge_array, &scalar_array)
+        .map_err(|e| JsValue::from_str(&format!("Failed to create proof: {}", e)))?;
+
+    bincode::serialize(&proof)
+        .map_err(|e| JsValue::from_str(&format!("Failed to serialize proof: {}", e)))
+}
+
+/// JavaScript-compatible VRF proof components
+#[wasm_bindgen]
+pub struct VRFComponentsJS {
+    gamma: Vec<u8>,
+    challenge: Vec<u8>,
+    scalar: Vec<u8>,
+}
+
+#[wasm_bindgen]
+impl VRFComponentsJS {
+    #[wasm_bindgen(getter)]
+    pub fn gamma(&self) -> js_sys::Uint8Array {
+        js_sys::Uint8Array::from(self.gamma.as_slice())
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn challenge(&self) -> js_sys::Uint8Array {
+        js_sys::Uint8Array::from(self.challenge.as_slice())
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn scalar(&self) -> js_sys::Uint8Array {
+        js_sys::Uint8Array::from(self.scalar.as_slice())
+    }
+}
+
 /// Get the version of the VRF-WASM library
 #[wasm_bindgen(js_name = "getVersion")]
 pub fn get_version() -> String {
@@ -176,6 +275,12 @@ export class VRFOutputJS {
     readonly proof: Uint8Array;
 }
 
+export class VRFComponentsJS {
+    readonly gamma: Uint8Array;
+    readonly challenge: Uint8Array;
+    readonly scalar: Uint8Array;
+}
+
 export function verifyProof(
     publicKey: Uint8Array,
     input: Uint8Array,
@@ -192,6 +297,20 @@ export function verifyOutput(
 ): boolean;
 
 export function keyPairFromSeed(seed: Uint8Array): VRFKeyPairJS;
+
+export function extractGamma(proof: Uint8Array): Uint8Array;
+
+export function extractChallenge(proof: Uint8Array): Uint8Array;
+
+export function extractScalar(proof: Uint8Array): Uint8Array;
+
+export function extractComponents(proof: Uint8Array): VRFComponentsJS;
+
+export function createProofFromComponents(
+    gamma: Uint8Array,
+    challenge: Uint8Array,
+    scalar: Uint8Array
+): Uint8Array;
 
 export function getVersion(): string;
 "#;
