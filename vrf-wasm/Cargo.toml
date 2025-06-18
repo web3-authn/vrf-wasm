@@ -32,4 +32,5 @@ sha3 = "0.10.6"
 thiserror = "1.0.38"
 zeroize = { version = "1.5.7", features = ["derive"] }
 
-fastcrypto-derive = { path = "../fastcrypto-derive" }
+# fastcrypto-derive = { path = "../fastcrypto-derive" }
+fastcrypto-derive = { version = "0.1.3" }

@@ -3,7 +3,7 @@ name = "vrf-wasm-js"
 version = "0.1.0"
 edition = "2021"
 license = "Apache-2.0"
-authors = ["Web3Authn <ser@web3authn.com>"]
+authors = ["Web3Authn <dev@web3authn.com>"]
 description = "VRF for WASM environments"
 repository = "https://github.com/web3authn/vrf-wasm"
 
