@@ -396,4 +396,5 @@ pub trait InsecureDefault {
 /// Trait impl'd by RNG's accepted by vrf-wasm.
 pub trait AllowedRng: CryptoRng + RngCore {}
 
-// The AllowedRng implementations are provided in the specific rng modules
+// Implement AllowedRng for ChaCha20Rng once to avoid conflicts
+impl AllowedRng for rand_chacha::ChaCha20Rng {}

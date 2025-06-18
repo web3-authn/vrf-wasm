@@ -321,14 +321,6 @@ checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 [[package]]
 name = "fastcrypto-derive"
 version = "0.1.3"
-dependencies = [
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
-name = "fastcrypto-derive"
-version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4c0c2af2157f416cb885e11d36cd0de2753f6d5384752d364075c835f5f8f891"
 dependencies = [
@@ -935,7 +927,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vrf-contract-verify"
-version = "0.1.0"
+version = "0.4.0"
 dependencies = [
  "bincode",
  "curve25519-dalek-ng",
@@ -947,7 +939,7 @@ dependencies = [
 
 [[package]]
 name = "vrf-wasm"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "auto_ops",
  "base64ct",
@@ -959,7 +951,7 @@ dependencies = [
  "derive_more",
  "digest 0.10.7",
  "elliptic-curve",
- "fastcrypto-derive 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fastcrypto-derive",
  "generic-array",
  "getrandom",
  "hex",
@@ -977,7 +969,7 @@ dependencies = [
 
 [[package]]
 name = "vrf-wasm-js"
-version = "0.2.0"
+version = "0.4.0"
 dependencies = [
  "bincode",
  "console_error_panic_hook",

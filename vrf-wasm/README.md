@@ -16,8 +16,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-vrf-wasm = "0.3"
-curve25519-dalek-ng = { version = "4.1", default-features = false, features = ["alloc"] }
+vrf-wasm = "0.4"
 ```
 
 
