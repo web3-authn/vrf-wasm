@@ -1,13 +1,17 @@
 [package]
-name = "vrf-contract-verify"
-version = "0.4.2"
+name = "vrf-contract-verifier"
+version = "0.5.0"
 edition = "2021"
 description = "Minimal VRF proof verification for smart contracts"
 license = "Apache-2.0"
 
 [dependencies]
 # Minimal curve25519 with no default features
-curve25519-dalek-ng = { version = "4.1", default-features = false, features = ["alloc"] }
+# disable default features:
+# - std (default)
+# - u64_backend (default)
+# Use only the "u32_backend" for maximum WASM compatibility
+curve25519-dalek-ng = { version = "4.1.1", default-features = false, features = ["u32_backend", "alloc"] }
 # SHA-512 for hashing (no-std compatible)
 sha2 = { version = "0.10", default-features = false }
 # Elliptic curve utilities for hash-to-curve
@@ -25,8 +29,6 @@ default = []
 near = ["near-sdk", "dep:bincode"]
 # Enable for CosmWasm contracts
 cosmwasm = ["dep:bincode"]
-# Enable binary serialization support
-serialization = ["dep:bincode"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]
