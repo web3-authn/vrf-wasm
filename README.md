@@ -37,7 +37,7 @@ Browser and Node.js bindings for the full VRF library:
 ### For Smart Contracts (Verification Only)
 ```toml
 [dependencies]
-vrf-contract-verify = { version = "0.1", features = ["near"] }
+vrf-contract-verifier = { version = "0.6", features = ["near"] }
 ```
 
 ```rust
@@ -68,7 +68,7 @@ const output = keypair.output(new TextEncoder().encode("random seed"));
 ### For Rust Applications
 ```toml
 [dependencies]
-vrf-wasm = "0.3"
+vrf-wasm = "0.6"
 ```
 
 ```rust
