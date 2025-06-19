@@ -1,12 +1,12 @@
 # VRF Verification Library for WASM contracts
 
-A minimal, optimized VRF proof verification library specifically designed for smart contracts on WASM-based platforms like NEAR, CosmWasm, and others.
+A minimal, optimized VRF proof verification library specifically designed for smart contracts on WASM-based platforms like NEAR, and others.
 
 ## Features
 
 - **Minimal Dependencies**: Only essential crypto libraries, no RNG or signing
 - **No-std Compatible**: Works in constrained smart contract environments
-- **Multi-Platform**: NEAR, CosmWasm, and generic WASM support
+- **Multi-Platform**: NEAR, and generic WASM support
 - **Size Optimized**: ~10KB compiled size vs 100KB+ for full libraries
 - **Conditional Compilation**: Only include platform-specific code when needed
 - **Battle Tested**: Uses proven verification logic from FastCrypto
@@ -132,9 +132,6 @@ pub struct VrfProof { ... }
 // Platform-specific dependencies only when features are enabled
 #[cfg(feature = "near")]
 use near_sdk;
-
-#[cfg(feature = "cosmwasm")]
-use cosmwasm_std;
 ```
 
 ## Compatibility
@@ -149,7 +146,6 @@ Compatible with Sui VRF implementation:
 
 ### Smart Contract Platforms
 - ✅ NEAR Protocol
-- ✅ CosmWasm (Cosmos SDK)
 - ✅ Generic WASM contracts
 
 ## Security Notes
