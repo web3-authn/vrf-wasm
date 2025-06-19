@@ -22,7 +22,7 @@ Browser and Node.js bindings for the full VRF library:
 - **Easy Integration**: Simple npm package
 - **Modern APIs**: Promise-based async functions
 
-### 📋 [`vrf-contract-verify/`](./vrf-contract-verify/) - Contract Verification Only
+### 📋 [`vrf-contract-verifier/`](./vrf-contract-verifier/) - NEAR Contract VRF Proof Verifier
 **NEW**: Minimal verification-only library optimized for smart contracts:
 - **Minimal**: Only verification logic (~10KB compiled)
 - **No-std Compatible**: Works in constrained environments
