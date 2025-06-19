@@ -137,7 +137,7 @@ const { hash, proof } = keypair.output(seed);
 
 // hash can be used as randomness
 // proof can be sent to contracts for verification
-``
+```
 
 ## License
 
