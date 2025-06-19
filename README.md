@@ -60,7 +60,7 @@ Browser and Node.js bindings for the full VRF library:
 
 ## WASM Compatibility
 
-Both `vrf-wasm` and `vrf-contract-verify` crates are designed for WASM environments:
+Both `vrf-wasm` and `vrf-contract-verifier` crates are designed for WASM environments:
 - **No std**: Compatible with no-std environments
 - **No global statics**: Avoids initialization issues
 - **Pure Rust**: No external dependencies on system libraries
@@ -80,7 +80,7 @@ Implements ECVRF with:
 ### Smart Contract Oracle
 ```rust
 // NEAR contract that verifies VRF proofs from authorized oracles
-use vrf_contract_verify::near::VrfVerifier;
+use vrf_contract_verifier::near::VrfVerifier;
 
 #[near_bindgen]
 impl RandomnessOracle {
