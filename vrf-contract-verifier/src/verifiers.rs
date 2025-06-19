@@ -1,5 +1,5 @@
 use crate::constants::CHALLENGE_LENGTH;
-use crate::vrf_verifier::{VrfOutput, VrfPublicKey, VrfProof, VerificationError};
+use crate::types::{VrfOutput, VrfPublicKey, VrfProof, VerificationError};
 
 // RFC 9381 proof length: gamma(32) + c(16) + s(32) = 80 bytes
 const RFC_VRF_PROOF_LENGTH: usize = 32 + CHALLENGE_LENGTH + 32; // 80 bytes

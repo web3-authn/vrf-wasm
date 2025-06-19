@@ -13,8 +13,23 @@
 //! - Use minimal cryptographic operations compatible with NEAR WASM
 
 pub mod constants;
-pub mod vrf_verifier;
-pub mod near;
+pub mod types;
+mod verifiers;
+
+pub use verifiers::{
+    verify_vrf,
+    verify_vrf_bool,
+    verify_vrf_fixed
+};
+pub use types::{
+    VrfOutput,
+    VrfPublicKey,
+    VrfProof,
+    VerificationError
+};
 
 #[cfg(test)]
 mod test;
+
+#[cfg(all(test, feature = "near"))]
+mod test_near;

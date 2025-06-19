@@ -11,29 +11,33 @@ mod conditional_compilation_tests {
     fn test_rng_implementation_selection() {
         let implementation = rng::get_rng_implementation();
 
-        #[cfg(feature = "browser")]
-        assert_eq!(implementation, "browser");
+        // Test the priority system:
+        // 1. browser feature takes priority when both are enabled (or is default)
+        // 2. near feature is used only when browser is explicitly disabled
 
-        #[cfg(feature = "near")]
-        assert_eq!(implementation, "near");
+        #[cfg(all(feature = "browser", feature = "near"))]
+        assert_eq!(implementation, "browser", "Browser should take priority when both features are enabled");
 
-        #[cfg(feature = "native")]
-        assert_eq!(implementation, "native");
+        #[cfg(all(feature = "browser", not(feature = "near")))]
+        assert_eq!(implementation, "browser", "Browser should be used when only browser feature is enabled");
+
+        #[cfg(all(feature = "near", not(feature = "browser")))]
+        assert_eq!(implementation, "near", "NEAR should be used when only near feature is enabled");
 
         println!("Using RNG implementation: {}", implementation);
     }
 
     #[test]
     fn test_rng_functionality() {
+
         // Create RNG instance based on the implementation
         #[cfg(feature = "browser")]
         let mut rng = rng::WasmRng;
 
+        // NOTE: defaults to browser based RNG for tests even when near feature is enabled
+        // We don't have near_workspace dependency added, so near testes would fail annyway
         #[cfg(feature = "near")]
         let mut rng = rng::WasmRng::default();
-
-        #[cfg(feature = "native")]
-        let mut rng = rng::WasmRng;
 
         // Test that we can generate different values
         let val1 = rng.next_u32();
@@ -77,18 +81,18 @@ mod vrf_component_tests {
 
     #[test]
     fn test_component_extraction() {
+
         // Create RNG instance based on the implementation
         #[cfg(feature = "browser")]
-        let mut rng_instance = rng::WasmRng;
+        let mut rng = rng::WasmRng;
 
+        // NOTE: defaults to browser based RNG for tests even when near feature is enabled
+        // We don't have near_workspace dependency added, so near testes would fail annyway
         #[cfg(feature = "near")]
-        let mut rng_instance = rng::WasmRng::default();
-
-        #[cfg(feature = "native")]
-        let mut rng_instance = rng::WasmRng;
+        let mut rng = rng::WasmRng::default();
 
         // Generate a keypair and proof
-        let keypair = ECVRFKeyPair::generate(&mut rng_instance);
+        let keypair = ECVRFKeyPair::generate(&mut rng);
         let input = b"test input for component extraction";
         let proof = keypair.prove(input);
 
@@ -118,18 +122,18 @@ mod vrf_component_tests {
 
     #[test]
     fn test_proof_reconstruction() {
+
         // Create RNG instance based on the implementation
         #[cfg(feature = "browser")]
-        let mut rng_instance = rng::WasmRng;
+        let mut rng = rng::WasmRng;
 
+        // NOTE: defaults to browser based RNG for tests even when near feature is enabled
+        // We don't have near_workspace dependency added, so near testes would fail annyway
         #[cfg(feature = "near")]
-        let mut rng_instance = rng::WasmRng::default();
-
-        #[cfg(feature = "native")]
-        let mut rng_instance = rng::WasmRng;
+        let mut rng = rng::WasmRng::default();
 
         // Generate a keypair and proof
-        let keypair = ECVRFKeyPair::generate(&mut rng_instance);
+        let keypair = ECVRFKeyPair::generate(&mut rng);
         let input = b"test input for proof reconstruction";
         let original_proof = keypair.prove(input);
 
@@ -166,9 +170,6 @@ mod vrf_component_tests {
 
         #[cfg(feature = "near")]
         let mut rng_instance = rng::WasmRng::default();
-
-        #[cfg(feature = "native")]
-        let mut rng_instance = rng::WasmRng;
 
         // Generate a keypair and proof
         let keypair = ECVRFKeyPair::generate(&mut rng_instance);

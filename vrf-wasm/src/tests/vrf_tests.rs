@@ -15,11 +15,10 @@ fn test_proof() {
     #[cfg(feature = "browser")]
     let mut rng_instance = rng::WasmRng;
 
+    // NOTE: defaults to browser based RNG for tests even when near feature is enabled
+    // We don't have near_workspace dependency added, so near testes would fail anyway
     #[cfg(feature = "near")]
     let mut rng_instance = rng::WasmRng::default();
-
-    #[cfg(feature = "native")]
-    let mut rng_instance = rng::WasmRng;
 
     let kp = ECVRFKeyPair::generate(&mut rng_instance);
     let input1 = b"Hello, world!";
@@ -39,15 +38,15 @@ fn test_proof() {
 
 #[test]
 fn test_serialize_deserialize() {
+
     // Create RNG instance based on the implementation
     #[cfg(feature = "browser")]
     let mut rng_instance = rng::WasmRng;
 
+    // NOTE: defaults to browser based RNG for tests even when near feature is enabled
+    // We don't have near_workspace dependency added, so near testes would fail anyway
     #[cfg(feature = "near")]
     let mut rng_instance = rng::WasmRng::default();
-
-    #[cfg(feature = "native")]
-    let mut rng_instance = rng::WasmRng;
 
     let kp = ECVRFKeyPair::generate(&mut rng_instance);
     let pk = &kp.pk;

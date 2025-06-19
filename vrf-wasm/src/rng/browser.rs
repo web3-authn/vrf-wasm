@@ -36,6 +36,12 @@ impl RngCore for WasmRng {
 
 impl AllowedRng for WasmRng {}
 
+impl Default for WasmRng {
+    fn default() -> Self {
+        Self
+    }
+}
+
 /// WASM-compatible seeded RNG using ChaCha20 for deterministic operations
 pub type WasmRngFromSeed = rand_chacha::ChaCha20Rng;
 

@@ -5,8 +5,8 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::near;
-    use crate::vrf_verifier::VerificationError;
+    use crate::verifiers;
+    use crate::types::VerificationError;
 
     // Import the main vrf-wasm library for proof generation
     use vrf_wasm::vrf::ecvrf::ECVRFKeyPair;
@@ -41,7 +41,7 @@ mod tests {
         proof_bytes.extend_from_slice(&scalar_bytes);
 
         // Verify using vrf-contract-verifier
-        let verification_result = near::verify_vrf(
+        let verification_result = verifiers::verify_vrf(
             proof_bytes,
             pk_bytes.to_vec(),
             input.to_vec(),
@@ -86,7 +86,7 @@ mod tests {
             proof_bytes.extend_from_slice(&scalar_bytes);
 
             // Verify using vrf-contract-verifier
-            let verification_result = near::verify_vrf(
+            let verification_result = verifiers::verify_vrf(
                 proof_bytes,
                 pk_bytes.to_vec(),
                 input.to_vec(),
@@ -133,7 +133,7 @@ mod tests {
             proof_bytes.extend_from_slice(&scalar_bytes);
 
             // Verify using vrf-contract-verifier
-            let verification_result = near::verify_vrf(
+            let verification_result = verifiers::verify_vrf(
                 proof_bytes,
                 pk_bytes.to_vec(),
                 input.to_vec(),
@@ -178,7 +178,7 @@ mod tests {
         corrupted_proof_bytes.extend_from_slice(&challenge_bytes);
         corrupted_proof_bytes.extend_from_slice(&scalar_bytes);
 
-        let result = near::verify_vrf(
+        let result = verifiers::verify_vrf(
             corrupted_proof_bytes,
             pk_bytes.to_vec(),
             input.to_vec(),
@@ -193,7 +193,7 @@ mod tests {
         corrupted_proof_bytes.extend_from_slice(&corrupted_challenge);
         corrupted_proof_bytes.extend_from_slice(&scalar_bytes);
 
-        let result = near::verify_vrf(
+        let result = verifiers::verify_vrf(
             corrupted_proof_bytes,
             pk_bytes.to_vec(),
             input.to_vec(),
@@ -208,7 +208,7 @@ mod tests {
         corrupted_proof_bytes.extend_from_slice(&challenge_bytes);
         corrupted_proof_bytes.extend_from_slice(&corrupted_scalar);
 
-        let result = near::verify_vrf(
+        let result = verifiers::verify_vrf(
             corrupted_proof_bytes,
             pk_bytes.to_vec(),
             input.to_vec(),
@@ -237,7 +237,7 @@ mod tests {
 
         // Try to verify with keypair2's public key (should fail)
         let wrong_pk_bytes = keypair2.public_key().to_byte_array();
-        let result = near::verify_vrf(
+        let result = verifiers::verify_vrf(
             proof_bytes,
             wrong_pk_bytes.to_vec(),
             input.to_vec(),
@@ -266,7 +266,7 @@ mod tests {
         proof_bytes.extend_from_slice(&scalar_bytes);
 
         // Try to verify with wrong input (should fail)
-        let result = near::verify_vrf(
+        let result = verifiers::verify_vrf(
             proof_bytes,
             pk_bytes.to_vec(),
             wrong_input.to_vec(),
@@ -299,7 +299,7 @@ mod tests {
         proof_array[48..80].copy_from_slice(&scalar_bytes);
 
         // Verify using the fixed-array API
-        let verification_result = near::verify_vrf_fixed(
+        let verification_result = verifiers::verify_vrf_fixed(
             &proof_array,
             &pk_bytes,
             input,
@@ -333,7 +333,7 @@ mod tests {
         proof_bytes.extend_from_slice(&scalar_bytes);
 
         // Test valid proof
-        let is_valid = near::verify_vrf_bool(
+        let is_valid = verifiers::verify_vrf_bool(
             proof_bytes.clone(),
             pk_bytes.to_vec(),
             input.to_vec(),
@@ -343,7 +343,7 @@ mod tests {
         // Test invalid proof (corrupted)
         let mut invalid_proof = proof_bytes;
         invalid_proof[0] ^= 0xFF; // Corrupt first byte
-        let is_valid = near::verify_vrf_bool(
+        let is_valid = verifiers::verify_vrf_bool(
             invalid_proof,
             pk_bytes.to_vec(),
             input.to_vec(),
@@ -415,7 +415,7 @@ mod tests {
         let test_input = b"test";
 
         // This should fail verification (invalid proof), but should parse correctly
-        let result = near::verify_vrf(
+        let result = verifiers::verify_vrf(
             test_proof_bytes,
             test_pk.to_vec(),
             test_input.to_vec(),

@@ -11,12 +11,42 @@ A minimal, optimized VRF proof verification library specifically designed for sm
 - **Conditional Compilation**: Only include platform-specific code when needed
 - **Battle Tested**: Uses proven verification logic from FastCrypto
 
+## Installation
+
+### Generic WASM Contracts (Default)
+
+```toml
+[dependencies]
+vrf-contract-verifier = "0.7"
+```
+
+### NEAR Smart Contracts
+
+For NEAR smart contracts with enhanced features:
+
+```toml
+[dependencies]
+vrf-contract-verifier = { version = "0.7", features = ["near"] }
+```
+
+### Using with VRF-WASM for Proof Generation
+
+When using both libraries together, ensure consistent feature configuration:
+
+```toml
+[dependencies]
+# For proof generation (NEAR contracts)
+vrf-wasm = { version = "0.7", default-features = false, features = ["near"] }
+# For proof verification (NEAR contracts)
+vrf-contract-verifier = { version = "0.7", features = ["near"] }
+```
+
 ## Quick Start
 
 ### Basic Usage (Generic WASM)
 
 ```rust
-use vrf_contract_verifier::near::{verify_vrf, VerificationError};
+use vrf_contract_verifier::{verify_vrf, VerificationError};
 
 // Verify a VRF proof (80 bytes: gamma(32) + challenge(16) + scalar(32))
 let result = verify_vrf(proof_bytes, public_key_bytes, input_bytes);
@@ -36,13 +66,8 @@ match result {
 
 ### NEAR Smart Contract
 
-```toml
-[dependencies]
-vrf-contract-verifier = { version = "0.6", features = ["near"] }
-```
-
 ```rust
-use vrf_contract_verifier::near::{verify_vrf_bool, verify_vrf};
+use vrf_contract_verifier::{verify_vrf_bool, verify_vrf};
 
 #[near_bindgen]
 impl MyContract {
@@ -61,18 +86,9 @@ impl MyContract {
 }
 ```
 
-### Generic WASM (without platform-specific features)
-
-```toml
-[dependencies]
-vrf-contract-verifier = { version = "0.6", default-features = false }
-```
-
 ## API Reference
 
 ### Core Verification Functions
-
-All verification functions are in the `near` module:
 
 #### `verify_vrf(proof_bytes, public_key_bytes, input) -> Result<VrfOutput, VerificationError>`
 Complete VRF verification returning the 64-byte VRF output on success.
@@ -83,49 +99,26 @@ Type-safe version using fixed-size arrays instead of Vec.
 #### `verify_vrf_bool(proof_bytes, public_key_bytes, input) -> bool`
 Simple boolean verification for contract usage.
 
-### Error Types
 
-```rust
-pub enum VerificationError {
-    InvalidProof,
-    InvalidInput,
-    InvalidPublicKey,
-    InvalidProofLength,
-    DecompressionFailed,
-    InvalidScalar,
-    InvalidGamma,
-    ZeroPublicKey,
-    ExpandMessageXmdFailed,
-}
-```
-
-## Build Configuration
-
-### Features
-
-| Feature | Description | Dependencies Added |
-|---------|-------------|-------------------|
-| `default` | No platform features | Base crypto only |
-| `near` | NEAR smart contract support | `near-sdk`, `bincode` |
-| `cosmwasm` | CosmWasm support | `bincode` |
-
-### Conditional Compilation Examples
+### Build Examples
 
 ```bash
 # Build without any platform features (smallest)
-cargo build --target wasm32-unknown-unknown --no-default-features --release
+cargo build --target wasm32-unknown-unknown --release
 
-# Build for NEAR smart contracts
-cargo build --target wasm32-unknown-unknown --features near --no-default-features --release
-
-# Build for CosmWasm
-cargo build --target wasm32-unknown-unknown --features cosmwasm --no-default-features --release
+# Build for NEAR contracts specifically
+cargo build --target wasm32-unknown-unknown --features near --release
 
 # Test all configurations
-cargo test                                    # Basic features
+cargo test                                   # Basic features
 cargo test --features near                   # With NEAR features
-cargo test --features cosmwasm               # With CosmWasm features
 ```
+
+### Important Notes
+
+- **Feature Compatibility**: When using both `vrf-wasm` and `vrf-contract-verifier` in the same project, ensure consistent feature flags
+- **NEAR Runtime**: The `near` feature enables NEAR-specific optimizations but requires NEAR runtime for execution
+- **Cross-Verification**: Both libraries use identical cryptographic implementations for compatibility
 
 ### Platform-Specific Build Optimization
 
@@ -165,51 +158,6 @@ Compatible with Sui VRF implementation:
 - Verify proofs were generated with proper randomness
 - Consider replay attack protection in contract logic
 
-## Example: NEAR VRF Oracle
-
-```rust
-use near_sdk::{near_bindgen, PanicOnDefault};
-use vrf_contract_verifier::near::VrfVerifier;
-
-#[near_bindgen]
-#[derive(PanicOnDefault)]
-pub struct VrfOracle {
-    verifier: VrfVerifier,
-    authorized_keys: Vec<[u8; 32]>,
-}
-
-#[near_bindgen]
-impl VrfOracle {
-    #[init]
-    pub fn new(authorized_keys: Vec<Vec<u8>>) -> Self {
-        Self {
-            verifier: VrfVerifier::new(),
-            authorized_keys: authorized_keys.into_iter()
-                .map(|k| k.try_into().expect("Invalid key length"))
-                .collect(),
-        }
-    }
-
-    pub fn submit_randomness(
-        &mut self,
-        proof: Vec<u8>,
-        public_key: Vec<u8>,
-        round: u64,
-    ) -> bool {
-        // Check if key is authorized
-        let pk_array: [u8; 32] = public_key.clone().try_into()
-            .expect("Invalid public key length");
-
-        if !self.authorized_keys.contains(&pk_array) {
-            return false;
-        }
-
-        // Verify the VRF proof
-        let input = round.to_le_bytes();
-        self.verifier.verify_vrf(proof, public_key, input.to_vec())
-    }
-}
-```
 
 ## License
 

@@ -1,6 +1,6 @@
 # VRF-WASM
 
-A WASM-compatible Verifiable Random Function (VRF) implementation extracted from [FastCrypto](https://github.com/MystenLabs/fastcrypto/).
+A WASM-compatible Verifiable Random Function (VRF) implementation based on [FastCrypto](https://github.com/MystenLabs/fastcrypto/).
 
 FastCrypto has C dependencies (`secp256k1-sys`, `blst`) that prevent WASM compilation even when compiling with `wasm` feature flags. This library extracts only the VRF module which uses pure Rust dependencies.
 
@@ -12,13 +12,38 @@ FastCrypto has C dependencies (`secp256k1-sys`, `blst`) that prevent WASM compil
 
 ## Installation
 
-Add to your `Cargo.toml`:
+### Browser/Web Applications (Default)
 
 ```toml
 [dependencies]
-vrf-wasm = "0.6"
+vrf-wasm = "0.7"
 ```
 
+### NEAR Smart Contracts
+
+For NEAR smart contracts, disable default features and enable only the NEAR feature:
+
+```toml
+[dependencies]
+vrf-wasm = { version = "0.7", default-features = false, features = ["near"] }
+```
+
+### Multi-Environment Support
+
+To support both browser and NEAR environments (browser takes priority):
+
+```toml
+[dependencies]
+vrf-wasm = { version = "0.7", features = ["near"] }
+```
+
+### Feature Flag Reference
+
+| Configuration | Features Enabled | RNG Implementation | Use Case |
+|---------------|------------------|-------------------|----------|
+| `vrf-wasm = "0.7"` | `["browser"]` (default) | Browser crypto API | Web apps, WASM in browser |
+| `vrf-wasm = { version = "0.7", features = ["near"] }` | `["browser", "near"]` | Browser (priority) | Testing/flexibility |
+| `vrf-wasm = { version = "0.7", default-features = false, features = ["near"] }` | `["near"]` only | NEAR block entropy | NEAR smart contracts |
 
 ## Usage
 
@@ -27,10 +52,10 @@ vrf-wasm = "0.6"
 ```rust
 use vrf_wasm::ecvrf::ECVRFKeyPair;
 use vrf_wasm::vrf::{VRFKeyPair, VRFProof};
-use vrf_wasm::traits::WasmRng;
+use vrf_wasm::rng::WasmRng;
 
 // Generate a keypair
-let mut rng = WasmRng;
+let mut rng = WasmRng::default();
 let keypair = ECVRFKeyPair::generate(&mut rng);
 
 // Create VRF proof for input
@@ -47,36 +72,13 @@ assert_eq!(hash, hash2);
 println!("VRF Hash: {}", hex::encode(hash));
 ```
 
-### Separate Proof Generation and Verification
-
-```rust
-use vrf_wasm::ecvrf::{ECVRFKeyPair, ECVRFProof, ECVRFPublicKey};
-use vrf_wasm::vrf::{VRFKeyPair, VRFProof};
-use vrf_wasm::traits::WasmRng;
-
-// Generate keypair
-let mut rng = WasmRng;
-let keypair = ECVRFKeyPair::generate(&mut rng);
-let public_key = keypair.pk.clone();
-
-// Create proof
-let input = b"message to sign";
-let proof = keypair.prove(input);
-
-// Verify proof (this could be done by a different party)
-assert!(proof.verify(input, &public_key).is_ok());
-
-// Extract hash from proof
-let hash = proof.to_hash();
-println!("VRF Output: {}", hex::encode(hash));
-```
 
 ### Deterministic KeyPair Generation
 
 ```rust
 use vrf_wasm::ecvrf::ECVRFKeyPair;
 use vrf_wasm::vrf::VRFKeyPair;
-use vrf_wasm::traits::WasmRngFromSeed;
+use vrf_wasm::rng::WasmRngFromSeed;
 use rand_core::SeedableRng;
 
 // Generate deterministic keypair from seed
@@ -102,7 +104,7 @@ use vrf_wasm::ecvrf::{ECVRFKeyPair, ECVRFProof, ECVRFPublicKey};
 use vrf_wasm::vrf::VRFKeyPair;
 
 // All types implement Serialize/Deserialize
-let mut rng = vrf_wasm::traits::WasmRng;
+let mut rng = vrf_wasm::rng::WasmRng::default();
 let keypair = ECVRFKeyPair::generate(&mut rng);
 let input = b"data";
 let proof = keypair.prove(input);
@@ -126,9 +128,9 @@ For cross-verification scenarios where you need to inspect or reconstruct VRF pr
 ```rust
 use vrf_wasm::ecvrf::{ECVRFKeyPair, ECVRFProof};
 use vrf_wasm::vrf::VRFKeyPair;
-use vrf_wasm::traits::WasmRng;
+use vrf_wasm::rng::WasmRng;
 
-let mut rng = WasmRng;
+let mut rng = WasmRng::default();
 let keypair = ECVRFKeyPair::generate(&mut rng);
 let proof = keypair.prove(b"input");
 
@@ -154,9 +156,7 @@ VRF-WASM uses conditional compilation to provide optimized RNG implementations f
 | Feature | Target Environment | RNG Implementation | Default |
 |---------|-------------------|-------------------|---------|
 | `browser` | Web browsers, JavaScript | `crypto.getRandomValues()` via getrandom | ✅ Yes |
-| `near` | NEAR smart contracts | Block-based entropy + ChaCha20 | ❌ No |
-| `native` | Native Rust applications | OS entropy via getrandom | ❌ No |
-| `deterministic` | Testing environments | Seeded ChaCha20 | ❌ No |
+| `near` | NEAR smart contracts | `env::random_seed()` + block-based entropy + ChaCha20 | ❌ No |
 
 ### Building for Different Targets
 
@@ -165,85 +165,39 @@ VRF-WASM uses conditional compilation to provide optimized RNG implementations f
 # Default build - includes browser RNG
 cargo build
 
-# Explicit browser feature
-cargo build --features browser
-
 # WASM for web
-wasm-pack build --target web --features browser
+wasm-pack build --target web
 ```
 
 #### NEAR Smart Contracts
 ```bash
-# NEAR-specific build
-cargo build --features near --no-default-features --target wasm32-unknown-unknown
+# NEAR-specific build (NEAR features only)
+cargo build --no-default-features --features near --target wasm32-unknown-unknown
 
-# With cargo-near (recommended)
+# With cargo-near (recommended for NEAR contracts)
 cargo install cargo-near
 cargo near build
 ```
 
-#### Native Applications
-```bash
-# Native-specific build
-cargo build --features native --no-default-features
 
-# Testing with deterministic RNG
-cargo test --features deterministic
-```
+### Environment-Specific RNG Usage
 
-### Feature Dependencies
+```rust
+// Generic usage (works with any feature configuration)
+use vrf_wasm::rng::WasmRng;
+let mut rng = WasmRng::default();
 
-```toml
-# In your Cargo.toml
-[dependencies]
-vrf-wasm = { version = "0.6", features = ["browser"] }  # Default
-# or
-vrf-wasm = { version = "0.6", features = ["near"], default-features = false }
-# or
-vrf-wasm = { version = "0.6", features = ["native"], default-features = false }
-```
+// Browser-specific (when browser feature is enabled)
+use vrf_wasm::rng::BrowserWasmRng;
+let mut rng = BrowserWasmRng::default();
 
-### RNG Implementation Details
-
-| Component | Browser | NEAR | Native |
-|-----------|---------|------|--------|
-| **Entropy Source** | `crypto.getRandomValues()` | `env::random_seed()` + block context | OS entropy |
-| **Algorithm** | Direct getrandom | Enhanced seed + ChaCha20 | Direct getrandom |
-| **Deterministic** | ❌ No | ✅ Per-block | ❌ No |
-| **Performance** | High | Medium | High |
-
-
-## Cross-Platform Compatibility
-
-### FastCrypto Compatibility
-**✅ What's the same across libraries:**
-- VRF operations on any given key remain logically the same across libraries
-**⚠️ What's Different:**
-- **Deterministic key generation**: Same seed produces different keys
-- **Random number sequences**: ChaCha20 vs ChaCha12 have similar but distinct patterns
-
-
-This library includes additional utility methods on ECVRFProof:
-- gamma_bytes(), challenge_bytes(), scalar_bytes() - for extracting individual components
-- from_components() - for constructing proofs from individual byte arrays
-- to_components() - for extracting all components as a tuple
-
-
-## Building for WASM
-
-```bash
-# Add WASM target
-rustup target add wasm32-unknown-unknown
-
-# For JavaScript/Browser (see Conditional Compilation section above)
-wasm-pack build --target web --features browser
-
-# For smart contracts (see NEAR section above)
-cargo build --target wasm32-unknown-unknown --features near --no-default-features --release
+// NEAR-specific (when near feature is enabled)
+use vrf_wasm::rng::NearWasmRng;
+let mut rng = NearWasmRng::default();
 ```
 
 
-## Performance
+## Binary Size
 
 | Target | Binary Size | Notes |
 |--------|-------------|--------|
@@ -260,11 +214,3 @@ This project is derived from [FastCrypto](https://github.com/MystenLabs/fastcryp
 **Original Copyright**: Copyright (c) 2022, Mysten Labs, Inc.
 **License**: Apache License 2.0
 **Original Repository**: https://github.com/MystenLabs/fastcrypto/
-
-## Show browser-specific usage
-use vrf_wasm::rng::BrowserWasmRng;
-let mut rng = BrowserWasmRng;
-
-## Show NEAR-specific usage
-use vrf_wasm::rng::NearWasmRng;
-let mut rng = NearWasmRng::default();
