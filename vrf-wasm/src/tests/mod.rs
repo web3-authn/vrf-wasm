@@ -5,7 +5,6 @@ pub mod test_helpers;
 #[cfg(test)]
 mod conditional_compilation_tests {
     use crate::rng;
-    use crate::traits::AllowedRng;
     use rand_core::RngCore;
 
     #[test]

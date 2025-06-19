@@ -3,7 +3,7 @@ resolver = "2"
 members = [
     "vrf-wasm",
     "vrf-wasm-js",
-    "vrf-contract-verify",
+    "vrf-contract-verifier"
 ]
 
 [workspace.dependencies]

@@ -120,7 +120,7 @@ All crates are designed for WASM environments:
 Implements ECVRF with:
 - **Curve**: Ristretto255 (prime-order group over Curve25519)
 - **Hash Function**: SHA-512
-- **Suite String**: `sui_vrf` (compatible with Sui blockchain)
+- **Suite String**: `sui_vrf`
 - **Output Length**: 64 bytes
 - **Challenge Length**: 16 bytes
 

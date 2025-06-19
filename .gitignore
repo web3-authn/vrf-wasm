@@ -1,4 +1,4 @@
 /target
 /vrf-wasm/pkg
 /vrf-wasm-js/pkg
-
+/vrf-contract-verifier/pkg
