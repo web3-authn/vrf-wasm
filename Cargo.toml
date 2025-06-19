@@ -6,6 +6,15 @@ members = [
     "vrf-contract-verifier"
 ]
 
+# Optimization profile for WASM builds
+# opt-level = "s" optimizes for size while maintaining good performance
+# strip = "symbols" removes debug symbols to reduce binary size
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = "symbols"
+
 [workspace.dependencies]
 # Common version pins for workspace members
 curve25519-dalek-ng = { version = "4.1.1", default-features = false }
