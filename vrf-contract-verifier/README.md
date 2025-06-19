@@ -38,7 +38,7 @@ match result {
 
 ```toml
 [dependencies]
-vrf-contract-verifier = { version = "0.4.3", features = ["near"] }
+vrf-contract-verifier = { version = "0.5", features = ["near"] }
 ```
 
 ```rust
@@ -65,7 +65,7 @@ impl MyContract {
 
 ```toml
 [dependencies]
-vrf-contract-verifier = { version = "0.4.3", default-features = false }
+vrf-contract-verifier = { version = "0.5", default-features = false }
 ```
 
 ## API Reference

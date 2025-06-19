@@ -939,7 +939,7 @@ dependencies = [
 
 [[package]]
 name = "vrf-wasm"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "auto_ops",
  "base64ct",
@@ -969,7 +969,7 @@ dependencies = [
 
 [[package]]
 name = "vrf-wasm-js"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "bincode",
  "console_error_panic_hook",
