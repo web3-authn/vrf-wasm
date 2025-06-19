@@ -50,7 +50,7 @@ mod near_contract_tests {
                  proof_bytes.len(), public_key_bytes.len(), input.len());
 
             // Verify the VRF proof using our verifier
-            match verify_vrf(proof_bytes, public_key_bytes, input) {
+            match verify_vrf(&proof_bytes, &public_key_bytes, &input) {
                 Ok(vrf_output) => {
                     self.successful_verifications += 1;
                     log!("VRF verification successful! Output: {:?}", &vrf_output[..8]);

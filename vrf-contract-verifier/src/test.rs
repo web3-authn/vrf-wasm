@@ -42,9 +42,9 @@ mod tests {
 
         // Verify using vrf-contract-verifier
         let verification_result = verifiers::verify_vrf(
-            proof_bytes,
-            pk_bytes.to_vec(),
-            input.to_vec(),
+            &proof_bytes,
+            &pk_bytes,
+            input,
         );
 
         // Assert verification succeeds
@@ -87,9 +87,9 @@ mod tests {
 
             // Verify using vrf-contract-verifier
             let verification_result = verifiers::verify_vrf(
-                proof_bytes,
-                pk_bytes.to_vec(),
-                input.to_vec(),
+                &proof_bytes,
+                &pk_bytes,
+                input,
             );
 
             // Assert verification succeeds
@@ -134,9 +134,9 @@ mod tests {
 
             // Verify using vrf-contract-verifier
             let verification_result = verifiers::verify_vrf(
-                proof_bytes,
-                pk_bytes.to_vec(),
-                input.to_vec(),
+                &proof_bytes,
+                &pk_bytes,
+                input,
             );
 
             // Assert verification succeeds
@@ -179,9 +179,9 @@ mod tests {
         corrupted_proof_bytes.extend_from_slice(&scalar_bytes);
 
         let result = verifiers::verify_vrf(
-            corrupted_proof_bytes,
-            pk_bytes.to_vec(),
-            input.to_vec(),
+            &corrupted_proof_bytes,
+            &pk_bytes,
+            input,
         );
         assert!(result.is_err(), "Corrupted gamma should fail verification");
 
@@ -194,9 +194,9 @@ mod tests {
         corrupted_proof_bytes.extend_from_slice(&scalar_bytes);
 
         let result = verifiers::verify_vrf(
-            corrupted_proof_bytes,
-            pk_bytes.to_vec(),
-            input.to_vec(),
+            &corrupted_proof_bytes,
+            &pk_bytes,
+            input,
         );
         assert!(result.is_err(), "Corrupted challenge should fail verification");
 
@@ -209,9 +209,9 @@ mod tests {
         corrupted_proof_bytes.extend_from_slice(&corrupted_scalar);
 
         let result = verifiers::verify_vrf(
-            corrupted_proof_bytes,
-            pk_bytes.to_vec(),
-            input.to_vec(),
+            &corrupted_proof_bytes,
+            &pk_bytes,
+            input,
         );
         assert!(result.is_err(), "Corrupted scalar should fail verification");
     }
@@ -238,9 +238,9 @@ mod tests {
         // Try to verify with keypair2's public key (should fail)
         let wrong_pk_bytes = keypair2.public_key().to_byte_array();
         let result = verifiers::verify_vrf(
-            proof_bytes,
-            wrong_pk_bytes.to_vec(),
-            input.to_vec(),
+            &proof_bytes,
+            &wrong_pk_bytes,
+            input,
         );
 
         assert!(result.is_err(), "Verification with wrong public key should fail");
@@ -267,9 +267,9 @@ mod tests {
 
         // Try to verify with wrong input (should fail)
         let result = verifiers::verify_vrf(
-            proof_bytes,
-            pk_bytes.to_vec(),
-            wrong_input.to_vec(),
+            &proof_bytes,
+            &pk_bytes,
+            wrong_input,
         );
 
         assert!(result.is_err(), "Verification with wrong input should fail");
@@ -416,9 +416,9 @@ mod tests {
 
         // This should fail verification (invalid proof), but should parse correctly
         let result = verifiers::verify_vrf(
-            test_proof_bytes,
-            test_pk.to_vec(),
-            test_input.to_vec(),
+            &test_proof_bytes,
+            &test_pk,
+            test_input,
         );
 
         // We expect this to fail, but not due to parsing errors

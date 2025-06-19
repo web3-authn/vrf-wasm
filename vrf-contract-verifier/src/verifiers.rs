@@ -29,9 +29,9 @@ pub fn verify_vrf_fixed(
 /// VRF verification function for NEAR contracts (Vec input for compatibility)
 /// Returns the VRF output on successful verification
 pub fn verify_vrf(
-    proof_bytes: Vec<u8>,
-    public_key_bytes: Vec<u8>,
-    input: Vec<u8>,
+    proof_bytes: &[u8],
+    public_key_bytes: &[u8],
+    input: &[u8],
 ) -> Result<VrfOutput, VerificationError> {
     if public_key_bytes.len() != 32 {
         return Err(VerificationError::InvalidPublicKey);
@@ -55,5 +55,5 @@ pub fn verify_vrf_bool(
     public_key_bytes: Vec<u8>,
     input: Vec<u8>,
 ) -> bool {
-    verify_vrf(proof_bytes, public_key_bytes, input).is_ok()
+    verify_vrf(&proof_bytes, &public_key_bytes, &input).is_ok()
 }
