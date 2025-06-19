@@ -16,7 +16,7 @@ A minimal, optimized VRF proof verification library specifically designed for sm
 ### Basic Usage (Generic WASM)
 
 ```rust
-use vrf_contract_verifier::near_vrf_verifier::{verify_vrf, VerificationError};
+use vrf_contract_verifier::near::{verify_vrf, VerificationError};
 
 // Verify a VRF proof (80 bytes: gamma(32) + challenge(16) + scalar(32))
 let result = verify_vrf(proof_bytes, public_key_bytes, input_bytes);
@@ -38,11 +38,11 @@ match result {
 
 ```toml
 [dependencies]
-vrf-contract-verifier = { version = "0.5", features = ["near"] }
+vrf-contract-verifier = { version = "0.6", features = ["near"] }
 ```
 
 ```rust
-use vrf_contract_verifier::near_vrf_verifier::{verify_vrf_bool, verify_vrf};
+use vrf_contract_verifier::near::{verify_vrf_bool, verify_vrf};
 
 #[near_bindgen]
 impl MyContract {
@@ -65,14 +65,14 @@ impl MyContract {
 
 ```toml
 [dependencies]
-vrf-contract-verifier = { version = "0.5", default-features = false }
+vrf-contract-verifier = { version = "0.6", default-features = false }
 ```
 
 ## API Reference
 
 ### Core Verification Functions
 
-All verification functions are in the `near_vrf_verifier` module:
+All verification functions are in the `near` module:
 
 #### `verify_vrf(proof_bytes, public_key_bytes, input) -> Result<VrfOutput, VerificationError>`
 Complete VRF verification returning the 64-byte VRF output on success.

@@ -16,7 +16,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-vrf-wasm = "0.5"
+vrf-wasm = "0.6"
 ```
 
 
@@ -196,11 +196,11 @@ cargo test --features deterministic
 ```toml
 # In your Cargo.toml
 [dependencies]
-vrf-wasm = { version = "0.5", features = ["browser"] }  # Default
+vrf-wasm = { version = "0.6", features = ["browser"] }  # Default
 # or
-vrf-wasm = { version = "0.5", features = ["near"], default-features = false }
+vrf-wasm = { version = "0.6", features = ["near"], default-features = false }
 # or
-vrf-wasm = { version = "0.5", features = ["native"], default-features = false }
+vrf-wasm = { version = "0.6", features = ["native"], default-features = false }
 ```
 
 ### RNG Implementation Details

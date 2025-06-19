@@ -169,6 +169,12 @@ pub mod ecvrf {
         Challenge(challenge_bytes)
     }
 
+    impl ECVRFKeyPair {
+        pub fn public_key(&self) -> RistrettoPoint {
+            self.pk.0
+        }
+    }
+
     /// Type representing a scalar of [C_LEN] bytes.
     #[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone, Copy)]
     pub struct Challenge(pub [u8; C_LEN]);
