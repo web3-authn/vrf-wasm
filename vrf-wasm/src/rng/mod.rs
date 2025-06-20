@@ -25,6 +25,14 @@ pub use browser::{WasmRng, WasmRngFromSeed};
 #[cfg(all(feature = "near", not(feature = "browser")))]
 pub use near::{WasmRng, WasmRngFromSeed};
 
+// Compile-time error when no features are selected
+#[cfg(all(not(feature = "browser"), not(feature = "near")))]
+compile_error!(
+    "No RNG implementation selected. Please enable one of the following features:\n\
+     - For browser/WASM: `features = [\"browser\"]`\n\
+     - For NEAR smart contracts: `features = [\"near\"]`"
+);
+
 // Re-export rand_core traits for consistency
 pub use rand_core::{CryptoRng, RngCore};
 

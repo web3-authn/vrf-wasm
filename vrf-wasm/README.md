@@ -12,38 +12,23 @@ FastCrypto has C dependencies (`secp256k1-sys`, `blst`) that prevent WASM compil
 
 ## Installation
 
-### Browser/Web Applications (Default)
+To use `vrf-wasm`, you must explicitly enable a feature flag for your target environment.
+
+### Browser/Web Applications
 
 ```toml
 [dependencies]
-vrf-wasm = "0.7"
+vrf-wasm = { version = "0.8", features = ["browser"] }
 ```
 
 ### NEAR Smart Contracts
 
-For NEAR smart contracts, disable default features and enable only the NEAR feature:
-
 ```toml
 [dependencies]
-vrf-wasm = { version = "0.7", default-features = false, features = ["near"] }
+vrf-wasm = { version = "0.8", default-features = false, features = ["near"] }
 ```
 
-### Multi-Environment Support
-
-To support both browser and NEAR environments (browser takes priority):
-
-```toml
-[dependencies]
-vrf-wasm = { version = "0.7", features = ["near"] }
-```
-
-### Feature Flag Reference
-
-| Configuration | Features Enabled | RNG Implementation | Use Case |
-|---------------|------------------|-------------------|----------|
-| `vrf-wasm = "0.7"` | `["browser"]` (default) | Browser crypto API | Web apps, WASM in browser |
-| `vrf-wasm = { version = "0.7", features = ["near"] }` | `["browser", "near"]` | Browser (priority) | Testing/flexibility |
-| `vrf-wasm = { version = "0.7", default-features = false, features = ["near"] }` | `["near"]` only | NEAR block entropy | NEAR smart contracts |
+If no feature is selected, you will get a compile-time error with instructions.
 
 ## Usage
 

@@ -17,7 +17,7 @@ A minimal, optimized VRF proof verification library specifically designed for sm
 
 ```toml
 [dependencies]
-vrf-contract-verifier = "0.7"
+vrf-contract-verifier = "0.8"
 ```
 
 ### NEAR Smart Contracts
@@ -26,20 +26,27 @@ For NEAR smart contracts with enhanced features:
 
 ```toml
 [dependencies]
-vrf-contract-verifier = { version = "0.7", features = ["near"] }
+vrf-contract-verifier = { version = "0.8", features = ["near"] }
 ```
 
 ### Using with VRF-WASM for Proof Generation
 
-When using both libraries together, ensure consistent feature configuration:
+To use both libraries together, you must enable the `browser` feature in `vrf-wasm` for your tests and the `near` feature for contract builds.
 
+**For `cargo test`:**
 ```toml
-[dependencies]
-# For proof generation (NEAR contracts)
+# In your dev-dependencies
+vrf-wasm = { version = "0.7", features = ["browser"] }
+```
+
+**For NEAR contract builds:**
+```toml
+# In your dependencies
 vrf-wasm = { version = "0.7", default-features = false, features = ["near"] }
-# For proof verification (NEAR contracts)
 vrf-contract-verifier = { version = "0.7", features = ["near"] }
 ```
+
+This setup ensures your tests use the browser-compatible RNG while your contract uses the NEAR-specific RNG.
 
 ## Quick Start
 
