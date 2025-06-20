@@ -1,6 +1,6 @@
 [package]
 name = "vrf-wasm-js"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2021"
 license = "Apache-2.0"
 authors = ["Web3Authn <dev@web3authn.com>"]
@@ -18,6 +18,9 @@ js-sys = "0.3"
 web-sys = "0.3"
 console_error_panic_hook = "0.1"
 serde-wasm-bindgen = "0.4"
-getrandom = { version = "0.2.15", features = ["js"] }
+getrandom = { version = "0.2.15", features = ["js"], optional = true }
 rand_core = { version = "0.6", default-features = false }
 bincode = "1.3.3"
+
+[features]
+browser = ["dep:getrandom", "getrandom?/js"]
