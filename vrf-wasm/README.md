@@ -199,3 +199,41 @@ This project is derived from [FastCrypto](https://github.com/MystenLabs/fastcryp
 **Original Copyright**: Copyright (c) 2022, Mysten Labs, Inc.
 **License**: Apache License 2.0
 **Original Repository**: https://github.com/MystenLabs/fastcrypto/
+
+## Advanced: Using with NEAR Smart Contracts
+
+When building a project that uses `vrf-wasm` for both on-chain (NEAR) and off-chain (testing) purposes, you need to handle Cargo's feature unification.
+
+### The Problem: Feature Unification
+
+If your `Cargo.toml` has this:
+```toml
+# In [dependencies]
+vrf-wasm = { version = "0.8", default-features = false, features = ["near"] }
+
+# In [dev-dependencies]
+vrf-wasm = { version = "0.8", features = ["browser"] }
+```
+Cargo will enable **both** `near` and `browser` features for all builds, which can cause conflicts.
+
+### The Solution: Target-Specific Dev-Dependencies
+
+To solve this, use a `[target]` configuration in your project's `Cargo.toml` to specify that the browser version of `vrf-wasm` should only be used for native testing environments, not for the `wasm32` smart contract build.
+
+```toml
+# In your project's Cargo.toml
+
+[dependencies]
+# This will be used for your smart contract build
+vrf-wasm = { version = "0.8", default-features = false, features = ["near"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+# This will be used for your native tests (`cargo test`)
+vrf-wasm = { version = "0.8", features = ["browser"] }
+```
+
+This configuration ensures:
+- ✅ **`cargo build --target wasm32-unknown-unknown`**: Compiles `vrf-wasm` with only the `near` feature.
+- ✅ **`cargo test`**: Compiles `vrf-wasm` with the `browser` feature for your test suite.
+
+This approach prevents feature conflicts and allows you to test your NEAR smart contracts with a browser-compatible version of the VRF library.
