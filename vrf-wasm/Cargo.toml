@@ -11,6 +11,7 @@ repository = "https://github.com/web3-authn/vrf-wasm"
 crate-type = ["cdylib", "rlib"]
 
 [features]
+default = ["browser"]
 browser = ["dep:getrandom", "getrandom?/js"]
 near = ["dep:near-sdk"]
 
