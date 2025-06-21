@@ -87,9 +87,7 @@ The **2,090x size difference** between `vrf-contract-verifier` and `vrf-wasm` co
 
 ### Supported Platforms (vrf-contract-verify)
 - ✅ **NEAR Protocol**: Native integration with near-sdk
-- ✅ **CosmWasm**: Cosmos SDK smart contracts
-- ✅ **Generic WASM**: Any WASM-based contract platform
-- 🔄 **Substrate/Polkadot**: With minimal modifications
+- ✅ **Generic WASM**: Any WASM-based contract platform such as Sui but this needs testing.
 
 
 ## WASM Compatibility
