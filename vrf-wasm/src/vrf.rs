@@ -155,6 +155,8 @@ pub mod ecvrf {
         pub sk: ECVRFPrivateKey,
     }
 
+    impl ZeroizeOnDrop for ECVRFKeyPair {}
+
     /// Generate challenge from five points. See section 5.4.3. of draft-irtf-cfrg-vrf-15.
     fn ecvrf_challenge_generation(points: [&RistrettoPoint; 5]) -> Challenge {
         let mut hash = H::default();

@@ -8,6 +8,7 @@ use crate::vrf::ecvrf::{ECVRFKeyPair, ECVRFProof, ECVRFPublicKey};
 use crate::vrf::{VRFKeyPair, VRFProof};
 use crate::tests::test_helpers::verify_serialization;
 use crate::rng;
+use zeroize::ZeroizeOnDrop;
 
 #[test]
 fn test_proof() {
@@ -107,4 +108,25 @@ fn test_ecvrf_invalid() {
     assert!(proof
         .verify_output(alpha_string, &public_key, output)
         .is_err());
+}
+
+#[test]
+fn test_ecvrf_keypair_zeroize_on_drop() {
+    // Test that ECVRFKeyPair implements ZeroizeOnDrop
+
+    // Create RNG instance based on the implementation
+    #[cfg(feature = "browser")]
+    let mut rng_instance = rng::WasmRng;
+
+    // NOTE: defaults to browser based RNG for tests even when near feature is enabled
+    // We don't have near_workspace dependency added, so near testes would fail anyway
+    #[cfg(feature = "near")]
+    let mut rng_instance = rng::WasmRng::default();
+
+    let kp = ECVRFKeyPair::generate(&mut rng_instance);
+
+    // This test verifies that ZeroizeOnDrop is implemented by creating a keypair
+    // and ensuring it can be used where ZeroizeOnDrop trait is required
+    fn requires_zeroize_on_drop<T: ZeroizeOnDrop>(_item: T) {}
+    requires_zeroize_on_drop(kp);
 }
