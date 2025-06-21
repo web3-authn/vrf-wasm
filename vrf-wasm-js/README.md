@@ -1,6 +1,6 @@
 # VRF-WASM JavaScript Bindings
 
-JavaScript/TypeScript bindings for the VRF-WASM library, for use in web browsers and Node.js.
+JavaScript/TypeScript bindings for the vrf-wasm library, for use in web browsers.
 
 ## Features
 
@@ -138,68 +138,6 @@ generateVRF("my-input").then(result => {
 });
 ```
 
-### React Hook Example
-
-```typescript
-// useVRF.ts
-import { useState, useCallback, useEffect } from 'react';
-import init, { VRFKeyPairJS, VRFOutputJS, verifyProof } from './pkg/vrf_wasm_js';
-
-interface VRFHook {
-    generateProof: (input: string) => Promise<VRFOutputJS | null>;
-    verify: (publicKey: Uint8Array, input: string, proof: Uint8Array) => Promise<boolean>;
-    isLoading: boolean;
-    error: string | null;
-}
-
-export function useVRF(): VRFHook {
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [initialized, setInitialized] = useState(false);
-
-    useEffect(() => {
-        init().then(() => setInitialized(true)).catch(setError);
-    }, []);
-
-    const generateProof = useCallback(async (input: string): Promise<VRFOutputJS | null> => {
-        if (!initialized) return null;
-
-        try {
-            setIsLoading(true);
-            setError(null);
-
-            const keypair = new VRFKeyPairJS();
-            const inputBytes = new TextEncoder().encode(input);
-            const output = keypair.output(inputBytes);
-
-            return output;
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Unknown error');
-            return null;
-        } finally {
-            setIsLoading(false);
-        }
-    }, [initialized]);
-
-    const verify = useCallback(async (
-        publicKey: Uint8Array,
-        input: string,
-        proof: Uint8Array
-    ): Promise<boolean> => {
-        if (!initialized) return false;
-
-        try {
-            const inputBytes = new TextEncoder().encode(input);
-            return verifyProof(publicKey, inputBytes, proof);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Unknown error');
-            return false;
-        }
-    }, [initialized]);
-
-    return { generateProof, verify, isLoading, error };
-}
-```
 
 ## Build Targets
 
@@ -221,28 +159,4 @@ wasm-pack build --target nodejs --out-dir pkg
 ```
 Use with: Node.js applications, server-side rendering
 
-
-## Bundle Sizes
-
-| Build Type | Size | Compressed (Brotli) |
-|------------|------|-------------------|
-| Debug | ~500KB | ~120KB |
-| Release | ~200KB | ~80KB |
-| Release + optimization | ~150KB | ~60KB |
-
-## Error Handling
-
-All functions return `Result` types in Rust, which translate to JavaScript:
-- Success: Returns the expected value
-- Error: Throws a JavaScript Error with descriptive message
-
-Common error cases:
-- Invalid public key format
-- Invalid proof format
-- Seed too short (< 32 bytes)
-- Hash length mismatch (must be 64 bytes)
-
-## Contributing
-
-This crate provides JavaScript bindings for the core VRF-WASM library. For core VRF functionality changes, see the parent `vrf-wasm` crate.
 
