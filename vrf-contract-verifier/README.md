@@ -151,10 +151,6 @@ Compatible with Sui VRF implementation:
 - Challenge length: 16 bytes
 - Output length: 64 bytes
 
-### Smart Contract Platforms
-- ✅ NEAR Protocol
-- ✅ Generic WASM contracts
-
 ## Security Notes
 
 - This library only performs **verification** - does not generate keys or proofs in contracts
