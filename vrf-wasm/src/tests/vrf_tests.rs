@@ -130,3 +130,32 @@ fn test_ecvrf_keypair_zeroize_on_drop() {
     fn requires_zeroize_on_drop<T: ZeroizeOnDrop>(_item: T) {}
     requires_zeroize_on_drop(kp);
 }
+
+#[test]
+fn test_secret_key_extraction() {
+    // Test that we can safely extract secret key bytes
+
+    // Create RNG instance based on the implementation
+    #[cfg(feature = "browser")]
+    let mut rng_instance = rng::WasmRng;
+
+    #[cfg(feature = "near")]
+    let mut rng_instance = rng::WasmRng::default();
+
+    let kp = ECVRFKeyPair::generate(&mut rng_instance);
+
+    // Extract secret key bytes using the new method
+    let secret_bytes = kp.secret_key_bytes();
+
+    // Verify the length is correct (32 bytes for ristretto255 scalar)
+    assert_eq!(secret_bytes.len(), 32);
+
+    // Test that we can also extract from the private key directly
+    let secret_bytes_direct = kp.sk.to_bytes();
+    assert_eq!(secret_bytes, secret_bytes_direct);
+
+    // Verify the keypair can still be used after extraction
+    let input = b"test message";
+    let (output, proof) = kp.output(input);
+    assert!(proof.verify_output(input, &kp.pk, &output).is_ok());
+}

@@ -147,6 +147,15 @@ pub mod ecvrf {
 
             RistrettoScalar::from_bytes_mod_order_wide(&k_string.digest)
         }
+
+        /// Extract the secret key as a 32-byte array.
+        ///
+        /// # Security Note
+        /// This exposes the raw secret key bytes. Handle with care and ensure proper
+        /// zeroization of the returned bytes after use.
+        pub fn to_bytes(&self) -> [u8; 32] {
+            self.0.to_byte_array()
+        }
     }
 
     #[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
@@ -174,6 +183,26 @@ pub mod ecvrf {
     impl ECVRFKeyPair {
         pub fn public_key(&self) -> RistrettoPoint {
             self.pk.0
+        }
+
+        /// Extract the secret key as a 32-byte array.
+        ///
+        /// # Security Note
+        /// This exposes the raw secret key bytes. Handle with care and ensure proper
+        /// zeroization of the returned bytes after use.
+        ///
+        /// # Example
+        /// ```
+        /// use vrf_wasm::ecvrf::ECVRFKeyPair;
+        /// use vrf_wasm::vrf::VRFKeyPair;
+        /// use rand::rngs::OsRng;
+        ///
+        /// let keypair = ECVRFKeyPair::generate(&mut OsRng);
+        /// let secret_bytes = keypair.secret_key_bytes();
+        /// assert_eq!(secret_bytes.len(), 32);
+        /// ```
+        pub fn secret_key_bytes(&self) -> [u8; 32] {
+            self.sk.to_bytes()
         }
     }
 
