@@ -193,11 +193,12 @@ pub mod ecvrf {
         ///
         /// # Example
         /// ```
-        /// use vrf_wasm::ecvrf::ECVRFKeyPair;
+        /// use vrf_wasm::vrf::ecvrf::ECVRFKeyPair;
         /// use vrf_wasm::vrf::VRFKeyPair;
-        /// use rand::rngs::OsRng;
+        /// use vrf_wasm::rng::WasmRng;
         ///
-        /// let keypair = ECVRFKeyPair::generate(&mut OsRng);
+        /// let mut rng = WasmRng;
+        /// let keypair = ECVRFKeyPair::generate(&mut rng);
         /// let secret_bytes = keypair.secret_key_bytes();
         /// assert_eq!(secret_bytes.len(), 32);
         /// ```

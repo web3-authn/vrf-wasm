@@ -36,14 +36,13 @@ Minimal verification-only library optimized for smart contracts:
 | Node.js Support | ✅ | ✅ | ❌ |
 | NEAR Contracts | ⚠️ | ❌ | ✅ |
 | Generic WASM | ⚠️ | ❌ | ✅ |
-| Compiled Size | 175 KB | 267 KB | 86 bytes |
 | Dependencies | Many | Many | Minimal |
 
-⚠️ = Possible but not optimized
+⚠️ = not optimized
 
 ## Binary Size Comparison
 
-Detailed comparison of compiled WASM binary sizes (optimized release builds with `opt-level="s"`):
+Compiled WASM binary sizes (optimized release builds with `opt-level="s"`) as follows:
 
 | Library | Binary Size | Size Ratio | Use Case |
 |---------|-------------|------------|----------|
@@ -51,11 +50,9 @@ Detailed comparison of compiled WASM binary sizes (optimized release builds with
 | **vrf-wasm** | **175 KB** | **2,090x larger** | Full VRF operations |
 | **vrf-wasm-js** | **267 KB** | **3,183x larger** | Browser-optimized |
 
-### Why Such Different Sizes?
+The size difference between `vrf-contract-verifier` and `vrf-wasm` comes from:
 
-The 2,090x size difference between `vrf-contract-verifier` and `vrf-wasm` comes from:
-
-1. **Functionality Scope**:
+1. **Scope**:
    - `vrf-contract-verifier`: Only verification logic
    - `vrf-wasm`: Complete VRF implementation (keygen, signing, verification)
 
@@ -64,7 +61,7 @@ The 2,090x size difference between `vrf-contract-verifier` and `vrf-wasm` comes 
    - `vrf-wasm`: RNG, serialization, encoding, multiple hash functions
 
 3. **Target Environment**:
-   - `vrf-contract-verifier`: Optimized for smart contracts where every byte counts
+   - `vrf-contract-verifier`: Optimized for smart contracts
    - `vrf-wasm`: General-purpose WASM environments
 
 ### Debug vs Release Optimization
