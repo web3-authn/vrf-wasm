@@ -16,7 +16,6 @@ use std::fmt::Debug;
 
 use base64ct::Encoding as _;
 use bech32::{FromBase32, Variant};
-use schemars::JsonSchema;
 use serde;
 use serde::de::{Deserializer, Error};
 use serde::ser::Serializer;
@@ -92,7 +91,7 @@ macro_rules! impl_try_from_string {
 }
 
 /// Base64 encoding
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(try_from = "String")]
 pub struct Base64(String);
 
@@ -115,7 +114,7 @@ impl Base64 {
 }
 
 /// Hex string encoding.
-#[derive(Deserialize, Debug, JsonSchema, Clone, PartialEq)]
+#[derive(Deserialize, Debug, Clone, PartialEq)]
 #[serde(try_from = "String")]
 pub struct Hex(String);
 
@@ -197,7 +196,7 @@ impl Encoding for Base64 {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
 #[serde(try_from = "String")]
 pub struct Base58(String);
 
