@@ -2020,7 +2020,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 
 [[package]]
 name = "vrf-contract-verifier"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "bincode",
  "borsh",
@@ -2034,7 +2034,7 @@ dependencies = [
 
 [[package]]
 name = "vrf-wasm"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "auto_ops",
  "base64ct",
@@ -2063,7 +2063,7 @@ dependencies = [
 
 [[package]]
 name = "vrf-wasm-js"
-version = "0.9.0"
+version = "0.9.1"
 dependencies = [
  "bincode",
  "console_error_panic_hook",

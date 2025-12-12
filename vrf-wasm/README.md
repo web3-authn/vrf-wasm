@@ -15,14 +15,14 @@ To use `vrf-wasm`, you must explicitly enable a feature flag for your target env
 
 ```toml
 [dependencies]
-vrf-wasm = { version = "0.8", features = ["browser"] }
+vrf-wasm = { version = "0.9.1", features = ["browser"] }
 ```
 
 ### NEAR Smart Contracts
 
 ```toml
 [dependencies]
-vrf-wasm = { version = "0.8", default-features = false, features = ["near"] }
+vrf-wasm = { version = "0.9.1", default-features = false, features = ["near"] }
 ```
 
 If no feature is selected, you will get a compile-time error with instructions.
@@ -210,10 +210,10 @@ When building a project that uses `vrf-wasm` for both on-chain (NEAR) and off-ch
 If your `Cargo.toml` has this:
 ```toml
 # In [dependencies]
-vrf-wasm = { version = "0.8", default-features = false, features = ["near"] }
+vrf-wasm = { version = "0.9.1", default-features = false, features = ["near"] }
 
 # In [dev-dependencies]
-vrf-wasm = { version = "0.8", features = ["browser"] }
+vrf-wasm = { version = "0.9.1", features = ["browser"] }
 ```
 Cargo will enable **both** `near` and `browser` features for all builds, which can cause conflicts.
 
@@ -226,11 +226,11 @@ To solve this, use a `[target]` configuration in your project's `Cargo.toml` to 
 
 [dependencies]
 # This will be used for your smart contract build
-vrf-wasm = { version = "0.8", default-features = false, features = ["near"] }
+vrf-wasm = { version = "0.9.1", default-features = false, features = ["near"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 # This will be used for your native tests (`cargo test`)
-vrf-wasm = { version = "0.8", features = ["browser"] }
+vrf-wasm = { version = "0.9.1", features = ["browser"] }
 ```
 
 This configuration ensures:
